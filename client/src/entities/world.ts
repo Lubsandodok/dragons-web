@@ -2,7 +2,7 @@ import { Graphics, Spritesheet } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 import Rapier from '@dimforge/rapier2d-compat';
 
-import { resources } from '../canvas';
+import { resources, WORLD_SIDE_X, WORLD_SIDE_Y } from '../canvas';
 import { Dragon } from './dragon';
 import { Level } from './level';
 import { Controls, WorldUpdatable } from '../controls';
@@ -17,8 +17,8 @@ export class World implements WorldUpdatable {
         const gravity = {x: 0.0, y: 9.81};
         this.physicsWorld = new Rapier.World(gravity);
         let groundColliderDesc = Rapier.ColliderDesc.cuboid(
-            716 * 5, 10
-        ).setTranslation(716 * 10 / 2, 394 * 10);
+            WORLD_SIDE_X, 10
+        ).setTranslation(0, WORLD_SIDE_Y);
         this.physicsWorld.createCollider(groundColliderDesc);
 
         this.level = new Level(camera);
@@ -39,6 +39,7 @@ export class World implements WorldUpdatable {
             this.getCurrentDragonStartPosition(),
         );
 //        dragon.applyGravity();
+        dragon.update();
         this.dragons[playerId] = dragon;
 
         if (isPlayer) {
@@ -63,10 +64,12 @@ export class World implements WorldUpdatable {
         }
     }
 
-    update() {
+    update(force: boolean = false) {
         // Dirty hack
-        if (Object.keys(this.dragons).length !== 2) {
-            return;
+        if (!force) {
+            if (Object.keys(this.dragons).length !== 2) {
+                return;
+            }
         }
 
         this.physicsWorld.step();
@@ -107,9 +110,9 @@ export class World implements WorldUpdatable {
     private getCurrentDragonStartPosition(): Rapier.Vector2 {
         const length = Object.keys(this.dragons).length;
         if (length === 0) {
-            return new Rapier.Vector2(0, 0);
+            return new Rapier.Vector2(WORLD_SIDE_X / 2 - 100, WORLD_SIDE_Y / 2);
         } else if (length === 1) {
-            return new Rapier.Vector2(100, 0);
+            return new Rapier.Vector2(WORLD_SIDE_X / 2 + 100, WORLD_SIDE_Y / 2);
         }
     }
 

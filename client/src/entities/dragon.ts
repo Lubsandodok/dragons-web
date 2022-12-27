@@ -3,23 +3,23 @@ import Rapier from '@dimforge/rapier2d-compat';
 import { Viewport } from 'pixi-viewport';
 
 import { Movable } from '../controls';
-import { Gravitable } from './common';
+import { DRAGON_SIDE_X, DRAGON_SIDE_Y } from '../canvas';
 
 export enum DragonType {
     GREEN = 'green',
     BLUE = 'blue',
 }
 
-export class Dragon implements Movable, Gravitable {
+export class Dragon implements Movable {
     flyingSprite: AnimatedSprite;
     rigidBody: Rapier.RigidBody;
 
     constructor(public camera: Viewport, public physics: Rapier.World, resource: Spritesheet, positionStart: Rapier.Vector) {
         this.flyingSprite = new AnimatedSprite(resource.animations.flying);
+        this.flyingSprite.scale.set(0.5);
         this.flyingSprite.animationSpeed = 0.3;
         this.flyingSprite.loop = false;
-        // TODO
-        this.flyingSprite.pivot.set(120, 112);
+        this.flyingSprite.pivot.set(DRAGON_SIDE_X / 2, DRAGON_SIDE_Y / 2);
 
         this.camera.addChild(this.flyingSprite);
 

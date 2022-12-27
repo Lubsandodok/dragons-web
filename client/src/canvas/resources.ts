@@ -1,12 +1,11 @@
-import { ISpritesheetData, ISpritesheetFrameData, Spritesheet, BaseTexture, Texture, Sprite } from 'pixi.js';
+import { ISpritesheetData, ISpritesheetFrameData, Spritesheet, BaseTexture, Texture } from 'pixi.js';
 
 import dragonGreenImage from 'url:../assets/dragon_green.png';
 import dragonBlueImage from 'url:../assets/dragon_blue.png';
 import skyImage from 'url:../assets/sky.png';
 import mountainImage from 'url:../assets/mountain.png';
 
-const DragonXStep = 240;
-const DragonYStep = 224;
+import { DRAGON_SIDE_X, DRAGON_SIDE_Y } from './constants';
 
 type GenerateFrameResultType = {[id: string]: ISpritesheetFrameData};
 
@@ -15,7 +14,7 @@ function generateFrames(name: string, y_still: number, x_step: number, frame_cou
     for (let frame: number = 0, x: number = 0; frame < frame_count; ++frame, x += x_step) {
         const full_name = name + '_' + frame.toString();
         result[full_name] = {
-            frame: {x: x, y: y_still, w: DragonXStep, h: DragonYStep},
+            frame: {x: x, y: y_still, w: DRAGON_SIDE_X, h: DRAGON_SIDE_Y},
         };
     }
     return result;
@@ -31,9 +30,9 @@ function generateAnimationNames(name: string, frame_count: number): string[] {
 
 const dragonAtlasData: ISpritesheetData = {
     frames: {
-        ...generateFrames('standing', 0, DragonXStep, 8),
-        ...generateFrames('walking', DragonYStep * 1, DragonXStep, 8),
-        ...generateFrames('flying', DragonYStep * 8, DragonXStep, 8),
+        ...generateFrames('standing', 0, DRAGON_SIDE_X, 8),
+        ...generateFrames('walking', DRAGON_SIDE_Y * 1, DRAGON_SIDE_X, 8),
+        ...generateFrames('flying', DRAGON_SIDE_Y * 8, DRAGON_SIDE_X, 8),
     },
     meta: {scale: '1'},
     animations: {
