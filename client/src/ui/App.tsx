@@ -8,21 +8,23 @@ class App extends React.Component {
     controls: Controls;
     canvasRef: React.RefObject<HTMLCanvasElement>;
 
-    state: {isGameVisible: boolean};
+    state: {isRoomsVisible: boolean, link: string};
 
     constructor(props: any) {
         super(props);
         this.canvasRef = React.createRef<HTMLCanvasElement>();
 
-        this.state = {isGameVisible: true};
+        this.state = {isRoomsVisible: true, link: null};
     }
 
     async componentDidMount(): Promise<void> {
         await loadPhysicsEngine();
         await loadResources();
-        this.canvas = new Canvas(this.canvasRef.current);
         this.controls = new Controls();
+        this.canvas = new Canvas(this.canvasRef.current, this.controls);
+        this.controls.subscibeWorld(this.canvas.world);
 
+        this.canvas.app.ticker.speed = 1;
         this.canvas.app.ticker.add(() => {
             this.canvas.world.update();
         });
@@ -33,21 +35,52 @@ class App extends React.Component {
             const roomId = splited[2];
             console.log('roomId we got', roomId);
             this.controls.joinRoom(roomId);
+            this.setState({isRoomsVisible: false});
         }
+
+//      debug
+//        this.setState({isRoomsVisible: false});
 
         return Promise.resolve();
     }
 
-    joinRoom = (roomId: string) => {
+    createRoom = (nickname: string) => {
+        console.log(nickname);
+        fetch('http://127.0.0.1:1234/api/room/create', {
+            method: 'POST',
+//            mode: 'no-cors',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({nickname}),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log('Success:', data);
+            const fullLink = `http://localhost:1234/room/${data.room_id}`;
+            this.setState({link: fullLink});
 
+            setTimeout(() => {
+                this.setState({isRoomsVisible: false});
+                this.controls.joinRoom(data.room_id);
+            }, 5000);
+        })
+        .catch((error) => {
+            console.log('Error:', error);
+        });
     };
 
     render() {
         return (
             <div>
-                <canvas ref={this.canvasRef} />
+                <canvas
+                    ref={this.canvasRef}
+                />
                 <Ui
-                    handle={this.handle}
+                    isRoomsVisible={this.state.isRoomsVisible}
+                    createRoom={this.createRoom}
+                    link={this.state.link}
                 />
             </div>
         )

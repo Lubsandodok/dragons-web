@@ -11,7 +11,7 @@ export class Level {
         this.background = new Container();
         camera.addChild(this.background);
 
-        this.background.scale = {x: 5, y: 5};
+        this.background.scale = {x: 10, y: 10};
         this.background
         this.background.addChild(mountainSprite);
         this.background.addChild(skySprite);

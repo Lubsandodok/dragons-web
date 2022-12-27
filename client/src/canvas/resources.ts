@@ -1,10 +1,12 @@
 import { ISpritesheetData, ISpritesheetFrameData, Spritesheet, BaseTexture, Texture, Sprite } from 'pixi.js';
 
-import dragonImage from 'url:../assets/dragon_green.png';
+import dragonGreenImage from 'url:../assets/dragon_green.png';
+import dragonBlueImage from 'url:../assets/dragon_blue.png';
 import skyImage from 'url:../assets/sky.png';
 import mountainImage from 'url:../assets/mountain.png';
 
-const DS = 240;
+const DragonXStep = 240;
+const DragonYStep = 224;
 
 type GenerateFrameResultType = {[id: string]: ISpritesheetFrameData};
 
@@ -13,7 +15,7 @@ function generateFrames(name: string, y_still: number, x_step: number, frame_cou
     for (let frame: number = 0, x: number = 0; frame < frame_count; ++frame, x += x_step) {
         const full_name = name + '_' + frame.toString();
         result[full_name] = {
-            frame: {x: x, y: y_still, w: DS, h: DS},
+            frame: {x: x, y: y_still, w: DragonXStep, h: DragonYStep},
         };
     }
     return result;
@@ -29,35 +31,47 @@ function generateAnimationNames(name: string, frame_count: number): string[] {
 
 const dragonAtlasData: ISpritesheetData = {
     frames: {
-        ...generateFrames('standing', 0, DS, 8),
-        ...generateFrames('walking', DS, DS, 8),
+        ...generateFrames('standing', 0, DragonXStep, 8),
+        ...generateFrames('walking', DragonYStep * 1, DragonXStep, 8),
+        ...generateFrames('flying', DragonYStep * 8, DragonXStep, 8),
     },
     meta: {scale: '1'},
     animations: {
         standing: generateAnimationNames('standing', 8),
         walking: generateAnimationNames('walking', 8),
+        flying: generateAnimationNames('flying', 8),
     },
 };
 
 export const resources:
 {
-    dragon: Spritesheet,
+    dragonGreen: Spritesheet,
+    dragonBlue: Spritesheet,
     sky: Texture,
     mountain: Texture,
 } = {
-    dragon: null,
+    dragonGreen: null,
+    dragonBlue: null,
     sky: null,
     mountain: null,
 };
 
 export async function loadResources() {
-    const dragonBaseTexture = BaseTexture.from(dragonImage);
-    const sheet = new Spritesheet(
-        dragonBaseTexture,
+    const dragonGreenBaseTexture = BaseTexture.from(dragonGreenImage);
+    const dragonGreenSheet = new Spritesheet(
+        dragonGreenBaseTexture,
         dragonAtlasData,
     );
-    await sheet.parse();
-    resources.dragon = sheet;
+    await dragonGreenSheet.parse();
+    resources.dragonGreen = dragonGreenSheet;
+
+    const dragonBlueBaseTexture = BaseTexture.from(dragonBlueImage);
+    const dragonBlueSheet = new Spritesheet(
+        dragonBlueBaseTexture,
+        dragonAtlasData,
+    );
+    await dragonBlueSheet.parse();
+    resources.dragonBlue = dragonBlueSheet;
 
     resources.sky = Texture.from(skyImage);
     resources.mountain = Texture.from(mountainImage);

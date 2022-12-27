@@ -1,13 +1,15 @@
 import { Application } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
+
 import { World } from '../entities';
+import { Controls } from '../controls';
 
 export class Canvas {
     app: Application;
     camera: Viewport;
     world: World;
 
-    constructor(view: HTMLCanvasElement) {
+    constructor(view: HTMLCanvasElement, controls: Controls) {
         this.app = new Application({
             view,
             resizeTo: window,
@@ -24,6 +26,6 @@ export class Canvas {
             .drag()
             .wheel();
 
-        this.world = new World(this.camera);
+        this.world = new World(this.camera, controls);
     }
 }
