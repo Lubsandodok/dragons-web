@@ -44,16 +44,14 @@ class App extends React.Component {
         return Promise.resolve();
     }
 
-    createRoom = (nickname: string) => {
-        console.log(nickname);
+    createRoom = (nickname: string, playerCount: number) => {
         fetch('http://127.0.0.1:1234/api/room/create', {
             method: 'POST',
-//            mode: 'no-cors',
             cache: 'no-cache',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({nickname}),
+            body: JSON.stringify({nickname, expected_player_count: playerCount}),
         })
         .then((response) => response.json())
         .then((data) => {

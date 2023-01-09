@@ -5,7 +5,7 @@ import Rooms from './Rooms';
 type UiProps = {
     isRoomsVisible: boolean,
     link: string,
-    createRoom: (nickname: string) => void,
+    createRoom: (nickname: string, playerCount: number) => void,
 };
 
 class Ui extends React.Component<UiProps> {

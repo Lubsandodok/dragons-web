@@ -8,6 +8,7 @@ import { Level } from './level';
 import { Controls, WorldUpdatable } from '../controls';
 
 export class World implements WorldUpdatable {
+    isGamePlaying: boolean = false;
     dragons: {[playerId: string]: Dragon} = {};
     level: Level;
     physicsWorld: Rapier.World;
@@ -27,6 +28,7 @@ export class World implements WorldUpdatable {
     }
 
     createCharacter(playerId: string, isPlayer: boolean): void {
+        console.log('Create', Object.keys(this.dragons), playerId);
         if (this.dragons.hasOwnProperty(playerId)) {
             console.log('Such player already exists', playerId);
             return;
@@ -64,12 +66,13 @@ export class World implements WorldUpdatable {
         }
     }
 
-    update(force: boolean = false) {
-        // Dirty hack
-        if (!force) {
-            if (Object.keys(this.dragons).length !== 2) {
-                return;
-            }
+    setIsGamePlaying(isGamePlaying: boolean) {
+        this.isGamePlaying = isGamePlaying;
+    }
+
+    update() {
+        if (!this.isGamePlaying) {
+            return;
         }
 
         this.physicsWorld.step();
@@ -100,6 +103,7 @@ export class World implements WorldUpdatable {
     private getCurrentDragonResource(): Spritesheet {
         // dragons should have different colors
         const length = Object.keys(this.dragons).length;
+        console.log(length);
         if (length === 0) {
             return resources.dragonGreen;
         } else if (length === 1) {

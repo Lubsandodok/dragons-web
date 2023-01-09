@@ -15,26 +15,30 @@ const DivCss: CSS.Properties = {
 };
 
 type RoomsProps = {
-    createRoom: (nickname: string) => void,
+    createRoom: (nickname: string, playerCount: number) => void,
     link: string | null,
 };
 
 export default class Rooms extends React.Component<RoomsProps> {
-    state: {nickname: string};
+    state: {nickname: string, playerCount: number};
 
     constructor(props: RoomsProps) {
         super(props);
 
-        this.state = {nickname: ''};
+        this.state = {nickname: '', playerCount: 2};
     }
 
-    handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleNickname = (event: React.ChangeEvent<HTMLInputElement>) => {
         this.setState({nickname: event.target.value});
     };
 
+    handlePlayerCount = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({playerCount: event.target.value});
+    };
+
     handleCreateRoomButton = () => {
-        console.log(this.state.nickname);
-        this.props.createRoom(this.state.nickname);
+        console.log(this.state.nickname, this.state.playerCount);
+        this.props.createRoom(this.state.nickname, this.state.playerCount);
     };
 
     render() {
@@ -46,7 +50,16 @@ export default class Rooms extends React.Component<RoomsProps> {
                         type='text'
                         placeholder='Nickname'
                         value={this.state.nickname}
-                        onChange={this.handleInput}
+                        onChange={this.handleNickname}
+                    />
+                </label>
+                <label>
+                    Enter Player's count
+                    <input
+                        type='number'
+                        placeholder="Player's count"
+                        value={this.state.playerCount}
+                        onChange={this.handlePlayerCount}
                     />
                 </label>
                 <button onClick={this.handleCreateRoomButton}>

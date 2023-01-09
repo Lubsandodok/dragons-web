@@ -80,7 +80,8 @@ export class Room {
     }
 
     getGamePlaying() : boolean {
-        return Object.keys(this.players).length === this.expectedPlayersCount - 1;
+        console.log(Object.keys(this.players).length, this.expectedPlayersCount);
+        return Object.keys(this.players).length === this.expectedPlayersCount;
     }
 
     setGamePlaying(isGamePlaying: boolean) {

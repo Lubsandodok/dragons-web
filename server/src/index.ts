@@ -74,7 +74,7 @@ const app = App({
     const url = req.getUrl();
 
     readJson(res, (obj: any) => {
-        console.log('Posted to ' + url + ': ');
+        console.log('Posted to', obj);
         const roomId = v4();
         rooms[roomId] = new Room(roomId, obj.expected_player_count);
         res.end(JSON.stringify({'room_id': roomId}));
