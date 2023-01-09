@@ -2,8 +2,14 @@ import { v4 } from 'uuid';
 
 import { App, HttpRequest, HttpResponse, WebSocket } from 'uWebSockets.js';
 
-import { readJson } from 'utils';
-import { Room, GameMethod, GameResponse } from 'room';
+import { readJson } from './utils';
+import {
+    Room,
+    GameMethod,
+    JoinRoomResponse,
+    PlayerWasJoinedResponse,
+    PlayerEventWasSentResponse,
+} from './room';
 
 let rooms: {[id: string]: Room} = {};
 
@@ -26,14 +32,67 @@ const app = App({
                 const room: Room = rooms[roomId];
                 const playerId = v4();
                 room.addPlayer(playerId, ws);
-                room.sendToOne(GameMethod.JOIN_ROOM, response);
+                ws.roomId = roomId;
+                ws.playerId = playerId;
+                const joinRoom: JoinRoomResponse = {your_player: playerId};
+                room.sendToOne(GameMethod.JOIN_ROOM, joinRoom, playerId, true);
+
+                const playerWasJoined: PlayerWasJoinedResponse = {
+                    players: room.getCurrentJoinedPlayers(),
+                    is_game_playing: room.getGamePlaying(),
+                };
+                room.sendToAll(GameMethod.PLAYER_WAS_JOINED, playerWasJoined);
+                console.log('Joined with id:', playerId);
             } else {
                 console.log('Error. Room was not found', roomId);
             }
-        } else if () {
+        } else if (data.method === GameMethod.SEND_PLAYER_EVENT) {
+            const playerId = ws.playerId;
+            const room = rooms[ws.roomId];
 
+            // Add validation
+            const event = data.parameters.event;
+            room.setPlayerEvent(playerId, event);
+            console.log('Player event was received:', playerId, event);
+        }
+        else if (data.method === GameMethod.FINISH_ROOM) {
+            // TODO: Later
         } else {
-
+            console.log('Error. Unknown method');
         }
     },
-})
+    close: (ws: WebSocket, code: number, message: ArrayBuffer) => {
+        // TODO
+    },
+}).post('/room/create', (res: HttpResponse, req: HttpRequest) => {
+     console.log('Request:', req);
+    const url = req.getUrl();
+
+    readJson(res, (obj: any) => {
+        console.log('Posted to ' + url + ': ');
+        const roomId = v4();
+        rooms[roomId] = new Room(roomId, obj.expected_player_count);
+        res.end(JSON.stringify({'room_id': roomId}));
+        console.log('Created room with id: ' + roomId);
+    }, () => {
+        console.log('Invalid JSON');
+    });
+
+    res.onAborted(() => {
+        console.log('Request aborted');
+    });
+}).listen(9001, (listenSocket) => {
+    if (listenSocket) {
+        console.log('Listening to port 9001');
+    }
+});
+
+
+setInterval(() => {
+    for (let roomId in rooms) {
+        const room = rooms[roomId];
+        const messageToSend: PlayerEventWasSentResponse = {players: room.getAllCurrentEvents()};
+        room.sendToAll(GameMethod.PLAYER_EVENT_WAS_SENT, messageToSend);
+        room.clearAllCurrentEvents();
+    }
+}, 33);

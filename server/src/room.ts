@@ -11,18 +11,20 @@ enum PlayerEvent {
 export enum GameMethod {
     PLAYER_EVENT_WAS_SENT = 'PLAYER_EVENT_WAS_SENT',
     JOIN_ROOM = 'JOIN_ROOM',
-    PLAYER_WAS_JOINED = 'PLAYER_WAS_JOINED'
+    PLAYER_WAS_JOINED = 'PLAYER_WAS_JOINED',
+    SEND_PLAYER_EVENT = 'SEND_PLAYER_EVENT',
+    FINISH_ROOM = 'FINISH_ROOM',
 }
 
-type PlayerEventWasSentResponse = {
+export type PlayerEventWasSentResponse = {
     players: {[id: string]: PlayerEvent}[],
 };
 
-type JoinRoomResponse = {
+export type JoinRoomResponse = {
     your_player: string,
 };
 
-type PlayerWasJoinedResponse = {
+export type PlayerWasJoinedResponse = {
     players: string[],
     is_game_playing: boolean,
 };
@@ -32,23 +34,26 @@ export type GameResponse = PlayerEventWasSentResponse | JoinRoomResponse | Playe
 type Player = {
     id: string,
     ws: WebSocket,
-    event?: PlayerEvent,
+    event: PlayerEvent,
 };
 
 
 export class Room {
     id: string;
+    expectedPlayersCount: number;
     isGamePlaying: boolean = false;
-    players: {[id: string]: Player};
+    players: {[id: string]: Player} = {};
 
-    constructor(roomId: string) {
+    constructor(roomId: string, expectedPlayersCount: number) {
         this.id = roomId;
+        this.expectedPlayersCount = expectedPlayersCount;
     }
 
     addPlayer(playerId: string, ws: WebSocket) {
         const player: Player = {
             id: playerId,
             ws: ws,
+            event: PlayerEvent.NONE,
         };
         this.players[playerId] = player;
         console.log('Player was added', playerId);
@@ -74,9 +79,29 @@ export class Room {
         return Object.keys(this.players);
     }
 
-    sendToOne(method: GameMethod, response: GameResponse, playerId: string) {
+    getGamePlaying() : boolean {
+        return Object.keys(this.players).length === this.expectedPlayersCount - 1;
+    }
+
+    setGamePlaying(isGamePlaying: boolean) {
+        this.isGamePlaying = isGamePlaying;
+    }
+
+    setPlayerEvent(playerId: string, event: PlayerEvent) {
+        this.players[playerId].event = event;
+    }
+
+    clearAllCurrentEvents() {
+        for (let playerId in this.players) {
+            const player = this.players[playerId];
+            player.event = PlayerEvent.NONE;
+        }
+    }
+
+    sendToOne(method: GameMethod, response: GameResponse, playerId: string, isResponse: boolean = false) {
         const ws = this.players[playerId].ws;
-        const messageToSend = {method: method, parameters: response};
+        const dataField = isResponse ? 'result' : 'parameters';
+        const messageToSend = {method: method, [dataField]: response};
         ws.send(JSON.stringify(messageToSend));
         console.log('Message was sent to', playerId);
     }

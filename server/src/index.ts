@@ -3,60 +3,72 @@ import { v4 } from 'uuid';
 import { App, HttpRequest, HttpResponse, WebSocket } from 'uWebSockets.js';
 
 import { readJson } from './utils';
+import {
+    Room,
+    GameMethod,
+    JoinRoomResponse,
+    PlayerWasJoinedResponse,
+    PlayerEventWasSentResponse,
+} from './room';
 
-type Player = {
-    id: string,
-    ws: WebSocket,
-    event: string,
-};
-
-type Room = {
-    id: string,
-    players: {[id: string]: Player},
-};
-
-let store: {rooms: {[id: string]: Room}} = {
-    rooms: {},
-};
-
-function handleMessage(data: any, ws: WebSocket) {
-    if (data.type === 'join') {
-        const roomId = data.room_id;
-        const playerId = v4();
-        store.rooms[roomId].players[playerId] = {id: playerId, ws: ws, event: ''};
-        ws.roomId = roomId;
-        ws.playerId = playerId;
-
-        const allPlayerIds = Object.keys(store.rooms[roomId].players);
-        for (const playerIdToSend of allPlayerIds) {
-            const wsToSend = store.rooms[roomId].players[playerIdToSend].ws;
-            wsToSend.send(JSON.stringify({type: 'join', players: allPlayerIds, your_player_id: playerIdToSend}));
-        }
-        console.log('Joined room with id', roomId, 'Player id: ', playerId);
-    } else if (data.type === 'event') {
-        const roomId = ws.roomId;
-        const playerId = ws.playerId;
-        store.rooms[roomId].players[playerId].event = data.event;
-        console.log('Got event', data.event, 'for player', playerId, 'in room', roomId);
-    }
-}
+let rooms: {[id: string]: Room} = {};
 
 const app = App({
 }).ws('/room/join', {
     open: (ws: WebSocket) => {
         console.log('WebSocket connection opened');
     },
-    message: (ws, message, isBinary) => {
-        console.log(`Got message: ${message}`);
+    message: (ws: WebSocket, message: ArrayBuffer, isBinary: boolean) => {
         const data = JSON.parse(Buffer.from(message).toString());
-        handleMessage(data, ws);
+
+        if (!(data.hasOwnProperty('method') & data.hasOwnProperty('parameters'))) {
+            console.log('Error. Message is not correct', data);
+            return;
+        }
+
+        if (data.method === GameMethod.JOIN_ROOM) {
+            const roomId = data.parameters.room_id;
+            if (rooms.hasOwnProperty(roomId)) {
+                const room: Room = rooms[roomId];
+                const playerId = v4();
+                room.addPlayer(playerId, ws);
+                ws.roomId = roomId;
+                ws.playerId = playerId;
+                const joinRoom: JoinRoomResponse = {your_player: playerId};
+                room.sendToOne(GameMethod.JOIN_ROOM, joinRoom, playerId, true);
+
+                const isGamePlaying = room.getGamePlaying();
+                const playerWasJoined: PlayerWasJoinedResponse = {
+                    players: room.getCurrentJoinedPlayers(),
+                    is_game_playing: isGamePlaying,
+                };
+                room.sendToAll(GameMethod.PLAYER_WAS_JOINED, playerWasJoined);
+                room.setGamePlaying(isGamePlaying);
+                console.log('Joined with id:', playerId);
+            } else {
+                console.log('Error. Room was not found', roomId);
+            }
+        } else if (data.method === GameMethod.SEND_PLAYER_EVENT) {
+            const playerId = ws.playerId;
+            const room = rooms[ws.roomId];
+
+            // Add validation
+            const event = data.parameters.event;
+            room.setPlayerEvent(playerId, event);
+            console.log('Player event was received:', playerId, event);
+        }
+        else if (data.method === GameMethod.FINISH_ROOM) {
+            // TODO: Later
+        } else {
+            console.log('Error. Unknown method');
+        }
     },
-    close: (ws: WebSocket) => {
+    close: (ws: WebSocket, code: number, message: ArrayBuffer) => {
         console.log('WebSocket connection closed');
-        const roomId = ws.roomId;
+        const room = rooms[ws.roomId];
         const playerId = ws.playerId;
-        delete store.rooms[roomId].players[playerId];
-    }
+        room.removePlayer(playerId);
+    },
 }).post('/room/create', (res: HttpResponse, req: HttpRequest) => {
     console.log('Request:', req);
     const url = req.getUrl();
@@ -64,7 +76,7 @@ const app = App({
     readJson(res, (obj: any) => {
         console.log('Posted to ' + url + ': ');
         const roomId = v4();
-        store.rooms[roomId] = {id: roomId, players: {}};
+        rooms[roomId] = new Room(roomId, obj.expected_player_count);
         res.end(JSON.stringify({'room_id': roomId}));
         console.log('Created room with id: ' + roomId);
     }, () => {
@@ -74,28 +86,6 @@ const app = App({
     res.onAborted(() => {
         console.log('Request aborted');
     });
-}).post('/http/room/join', (res: HttpResponse, req: HttpRequest) => {
-    console.log('RequestToJoin:', req);
-
-    readJson(res, (obj: any) => {
-        console.log('Posted to ', obj);
-        if (!obj.hasOwnProperty('room_id')) {
-            console.log('Request body doesnt have room_id');
-            res.end(JSON.stringify({'error': 'Doesnt have a room_id'}));
-        }
-
-        const room_id = obj.room_id;
-        if (store.rooms.hasOwnProperty(room_id)) {
-            const room = store.rooms.room_id;
-            console.log('Joined');
-            res.end(JSON.stringify({'result': 'You have successfully joined'}));
-        } else {
-            console.log('Doesnt have a room like that');
-            res.end(JSON.stringify({'error': 'Doesnt have a room like that'}));
-        }
-    }, () => {
-        console.log('Invalid JSON');
-    });
 }).listen(9001, (listenSocket) => {
     if (listenSocket) {
         console.log('Listening to port 9001');
@@ -104,28 +94,12 @@ const app = App({
 
 
 setInterval(() => {
-    for (let roomId in store.rooms) {
-        const room = store.rooms[roomId];
-        for (let playerId in room.players) {
-            const player = room.players[playerId];
-            let eventsToSend: {[id: string]: string} = {};
-            for (let anotherPlayerId in room.players) {
-                const anotherPlayer = room.players[anotherPlayerId];
-//                if (playerId !== anotherPlayerId) {
-                if (anotherPlayer.event !== '') {
-                    eventsToSend[anotherPlayerId] = anotherPlayer.event;
-                }
-//                }
-            }
-            player.ws.send(JSON.stringify({type: 'event', players: eventsToSend}));
+    for (let roomId in rooms) {
+        const room = rooms[roomId];
+        if (room.getGamePlaying()) {
+            const messageToSend: PlayerEventWasSentResponse = {players: room.getAllCurrentEvents()};
+            room.sendToAll(GameMethod.PLAYER_EVENT_WAS_SENT, messageToSend);
+            room.clearAllCurrentEvents();
         }
-
-        // delete events from players
-        for (let playerId in room.players) {
-            const player = room.players[playerId];
-            player.event = '';
-        }
-
-        console.log('Sent events to players in room', roomId, 'players:', Object.keys(room.players));
     }
 }, 33);
