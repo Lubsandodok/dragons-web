@@ -50,6 +50,12 @@ const app = App({
         console.log(`Got message: ${message}`);
         const data = JSON.parse(Buffer.from(message).toString());
         handleMessage(data, ws);
+    },
+    close: (ws: WebSocket) => {
+        console.log('WebSocket connection closed');
+        const roomId = ws.roomId;
+        const playerId = ws.playerId;
+        delete store.rooms[roomId].players[playerId];
     }
 }).post('/room/create', (res: HttpResponse, req: HttpRequest) => {
     console.log('Request:', req);
