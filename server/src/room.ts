@@ -80,7 +80,7 @@ export class Room {
     }
 
     getGamePlaying() : boolean {
-        console.log(Object.keys(this.players).length, this.expectedPlayersCount);
+//        console.log(Object.keys(this.players).length, this.expectedPlayersCount);
         return Object.keys(this.players).length === this.expectedPlayersCount;
     }
 
@@ -89,6 +89,7 @@ export class Room {
     }
 
     setPlayerEvent(playerId: string, event: PlayerEvent) {
+        console.log('Event was set', playerId, event);
         this.players[playerId].event = event;
     }
 
@@ -112,7 +113,7 @@ export class Room {
             const player = this.players[playerId];
             const messageToSend = {method: method, parameters: response};
             player.ws.send(JSON.stringify(messageToSend));
-            console.log('Message was sent to', playerId);
+//            console.log('Message was sent to', playerId);
         }
     }
 }

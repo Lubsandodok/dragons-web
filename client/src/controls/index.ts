@@ -8,6 +8,7 @@ export interface Movable {
 
 export interface WorldUpdatable {
     createCharacter(playerId: string, isPlayer: boolean): void;
+    createFireball(playerId: string): void;
     moveCharacter(playerId: string, event: string): void;
     setIsGamePlaying(isGamePlaying: boolean): void;
 }
@@ -15,7 +16,7 @@ export interface WorldUpdatable {
 function getPlayerEvent(event: KeyboardEvent) {
     if (event.code === 'KeyW') {
         return PlayerEvent.DRAGON_MOVE;
-    } else if (event.code === 'KeyL') {
+    } else if (event.code === 'KeyA') {
         return PlayerEvent.DRAGON_LEFT;
     } else if (event.code === 'KeyD') {
         return PlayerEvent.DRAGON_RIGHT;
@@ -91,7 +92,11 @@ export class Controls {
             for (const player of players) {
                 const playerId = Object.keys(player)[0];
                 const event = player[playerId];
-                this.world.moveCharacter(playerId, event);
+                if (event === PlayerEvent.CREATE_FIREBALL) {
+                    this.world.createFireball(playerId);
+                } else {
+                    this.world.moveCharacter(playerId, event);
+                }
                 console.log('Got event', data);
             }
         }

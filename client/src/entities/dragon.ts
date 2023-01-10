@@ -4,6 +4,7 @@ import { Viewport } from 'pixi-viewport';
 
 import { Movable } from '../controls';
 import { DRAGON_SIDE_X, DRAGON_SIDE_Y } from '../canvas';
+import { FireballOptions } from './fireball';
 
 export enum DragonType {
     GREEN = 'green',
@@ -59,8 +60,8 @@ export class Dragon implements Movable {
         }
     }
 
-    applyGravity(): void {
-        this.rigidBody.addForce(new Rapier.Vector2(0, 9.81), false);
+    getFireballOptions(): FireballOptions {
+        
     }
 
     update() {

@@ -83,9 +83,9 @@ const app = App({
         console.log('Invalid JSON');
     });
 
-    res.onAborted(() => {
-        console.log('Request aborted');
-    });
+    // res.onAborted(() => {
+    //     console.log('Request aborted');
+    // });
 }).listen(9001, (listenSocket) => {
     if (listenSocket) {
         console.log('Listening to port 9001');

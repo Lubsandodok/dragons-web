@@ -4,8 +4,9 @@ import dragonGreenImage from 'url:../assets/dragon_green.png';
 import dragonBlueImage from 'url:../assets/dragon_blue.png';
 import skyImage from 'url:../assets/sky.png';
 import mountainImage from 'url:../assets/mountain.png';
+import fireballsImage from 'url:../assets/origin.png';
 
-import { DRAGON_SIDE_X, DRAGON_SIDE_Y } from './constants';
+import { DRAGON_SIDE_X, DRAGON_SIDE_Y, FIREBALL_SIDE_X, FIREBALL_SIDE_Y } from './constants';
 
 type GenerateFrameResultType = {[id: string]: ISpritesheetFrameData};
 
@@ -42,17 +43,29 @@ const dragonAtlasData: ISpritesheetData = {
     },
 };
 
+const fireballAtlasData: ISpritesheetData = {
+    frames: {
+        ...generateFrames('shot', 775, FIREBALL_SIDE_X, 6),
+    },
+    meta: {scale: '1'},
+    animations: {
+        shot: generateAnimationNames('shot', 6),
+    },
+};
+
 export const resources:
 {
     dragonGreen: Spritesheet,
     dragonBlue: Spritesheet,
     sky: Texture,
     mountain: Texture,
+    fireball: Spritesheet,
 } = {
     dragonGreen: null,
     dragonBlue: null,
     sky: null,
     mountain: null,
+    fireball: null,
 };
 
 export async function loadResources() {
@@ -71,6 +84,14 @@ export async function loadResources() {
     );
     await dragonBlueSheet.parse();
     resources.dragonBlue = dragonBlueSheet;
+
+    const fireballBaseTexture = BaseTexture.from(fireballsImage);
+    const fireballSheet = new Spritesheet(
+        fireballBaseTexture,
+        fireballAtlasData,
+    );
+    await fireballSheet.parse();
+    resources.fireball = fireballSheet;
 
     resources.sky = Texture.from(skyImage);
     resources.mountain = Texture.from(mountainImage);

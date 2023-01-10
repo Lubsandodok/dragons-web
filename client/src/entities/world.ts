@@ -2,14 +2,16 @@ import { Graphics, Spritesheet } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 import Rapier from '@dimforge/rapier2d-compat';
 
-import { resources, WORLD_SIDE_X, WORLD_SIDE_Y } from '../canvas';
+import { resources, WORLD_SIDE_X, WORLD_SIDE_Y, PlayerEvent } from '../canvas';
 import { Dragon } from './dragon';
 import { Level } from './level';
 import { Controls, WorldUpdatable } from '../controls';
+import { Fireball } from './fireball';
 
 export class World implements WorldUpdatable {
     isGamePlaying: boolean = false;
     dragons: {[playerId: string]: Dragon} = {};
+    fireballs: Fireball[] = [];
     level: Level;
     physicsWorld: Rapier.World;
     debugGraphics: Graphics;
@@ -57,13 +59,22 @@ export class World implements WorldUpdatable {
     moveCharacter(playerId: string, event: string): void {
         console.log('Current dragons', this.dragons);
         const dragon = this.dragons[playerId];
-        if (event === 'KeyW') {
+        if (event === PlayerEvent.DRAGON_MOVE) {
             dragon.moveUp();
-        } else if (event === 'KeyA') {
+        } else if (event === PlayerEvent.DRAGON_LEFT) {
             dragon.moveLeft();
-        } else if (event === 'KeyD') {
+        } else if (event === PlayerEvent.DRAGON_RIGHT) {
             dragon.moveRight();
         }
+    }
+
+    createFireball(playerId: string) {
+        console.log('Create fireball for', playerId);
+        const dragon = this.dragons[playerId];
+
+        const fireball = new Fireball(
+            this.camera, this.physicsWorld, 
+        );
     }
 
     setIsGamePlaying(isGamePlaying: boolean) {
