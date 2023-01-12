@@ -71,7 +71,7 @@ export class Controls {
     }
 
     onMessage(event: MessageEvent) {
-        console.log('Got message from server:', event.data);
+//        console.log('Got message from server:', event.data);
         const data = JSON.parse(event.data);
 
         // TODO validation
@@ -97,7 +97,7 @@ export class Controls {
                 } else {
                     this.world.moveCharacter(playerId, event);
                 }
-                console.log('Got event', data);
+//                console.log('Got event', data);
             }
         }
     }

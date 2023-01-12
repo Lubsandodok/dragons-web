@@ -10,12 +10,19 @@ import { DRAGON_SIDE_X, DRAGON_SIDE_Y, FIREBALL_SIDE_X, FIREBALL_SIDE_Y } from '
 
 type GenerateFrameResultType = {[id: string]: ISpritesheetFrameData};
 
-function generateFrames(name: string, y_still: number, x_step: number, frame_count: number): GenerateFrameResultType {
+function generateFrames(
+    name: string,
+    y_still: number,
+    x_step: number,
+    frame_count: number,
+    width: number = DRAGON_SIDE_X,
+    height: number = DRAGON_SIDE_Y,
+): GenerateFrameResultType {
     let result: GenerateFrameResultType = {};
     for (let frame: number = 0, x: number = 0; frame < frame_count; ++frame, x += x_step) {
         const full_name = name + '_' + frame.toString();
         result[full_name] = {
-            frame: {x: x, y: y_still, w: DRAGON_SIDE_X, h: DRAGON_SIDE_Y},
+            frame: {x: x, y: y_still, w: width, h: height},
         };
     }
     return result;
@@ -45,7 +52,7 @@ const dragonAtlasData: ISpritesheetData = {
 
 const fireballAtlasData: ISpritesheetData = {
     frames: {
-        ...generateFrames('shot', 775, FIREBALL_SIDE_X, 6),
+        ...generateFrames('shot', 775, FIREBALL_SIDE_X, 6, FIREBALL_SIDE_X, FIREBALL_SIDE_Y),
     },
     meta: {scale: '1'},
     animations: {

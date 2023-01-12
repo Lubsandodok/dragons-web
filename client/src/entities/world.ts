@@ -57,7 +57,6 @@ export class World implements WorldUpdatable {
     }
 
     moveCharacter(playerId: string, event: string): void {
-        console.log('Current dragons', this.dragons);
         const dragon = this.dragons[playerId];
         if (event === PlayerEvent.DRAGON_MOVE) {
             dragon.moveUp();
@@ -73,8 +72,12 @@ export class World implements WorldUpdatable {
         const dragon = this.dragons[playerId];
 
         const fireball = new Fireball(
-            this.camera, this.physicsWorld, 
+            this.camera, this.physicsWorld, dragon.getFireballOptions(),
         );
+        fireball.update();
+        this.fireballs.push(fireball);
+
+        fireball.fire();
     }
 
     setIsGamePlaying(isGamePlaying: boolean) {
@@ -90,6 +93,9 @@ export class World implements WorldUpdatable {
 
         for (const playerId in this.dragons) {
             this.dragons[playerId].update();
+        }
+        for (const fireball of this.fireballs) {
+            fireball.update();
         }
 
         this.drawDebugGraphics();
