@@ -17,7 +17,7 @@ export class World implements WorldUpdatable {
     debugGraphics: Graphics;
 
     constructor(public camera: Viewport, public controls: Controls) {
-        const gravity = {x: 0.0, y: 9.81};
+        const gravity = {x: 0.0, y: 20};
         this.physicsWorld = new Rapier.World(gravity);
         let groundColliderDesc = Rapier.ColliderDesc.cuboid(
             WORLD_SIDE_X, 10

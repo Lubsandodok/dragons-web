@@ -46,7 +46,7 @@ export class Dragon implements Movable {
             const rotationVector = computeRotationVector(this.rigidBody.rotation());
             const rotationVectorDirected = rotateRightVector(rotationVector);
             console.log('Rotation vector', rotationVector);
-            this.rigidBody.applyImpulse(multiplyVector(rotationVectorDirected, 100), false);
+            this.rigidBody.applyImpulse(multiplyVector(rotationVectorDirected, 200), false);
             this.flyingSprite.gotoAndPlay(0);
         }
     }
