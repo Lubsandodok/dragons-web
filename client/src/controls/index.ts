@@ -7,10 +7,11 @@ export interface Movable {
 }
 
 export interface WorldUpdatable {
-    createCharacter(playerId: string, isPlayer: boolean): void;
+    createCharacter(playerId: string): void;
     createFireball(playerId: string): void;
     moveCharacter(playerId: string, event: string): void;
     setIsGamePlaying(isGamePlaying: boolean): void;
+    setMyPlayerId(myPlayerId: string): void;
 }
 
 function getPlayerEvent(event: KeyboardEvent) {
@@ -77,14 +78,14 @@ export class Controls {
         // TODO validation
         if (data.method === GameMethod.JOIN_ROOM) {
             console.log('Joined room with id', data.result.your_player);
-            this.world.createCharacter(data.result.your_player, true);
+            this.world.setMyPlayerId(data.result.your_player);
+            // this.world.createCharacter(data.result.your_player, true);
         } else if (data.method === GameMethod.PLAYER_WAS_JOINED) {
             const players = data.parameters.players;
-            for (const playerId of players) {
-                this.world.createCharacter(playerId, false);
-            }
             if (data.parameters.is_game_playing) {
-                // todo
+                for (const playerId of players) {
+                    this.world.createCharacter(playerId);
+                }
                 this.world.setIsGamePlaying(true);
             }
         } else if (data.method === GameMethod.PLAYER_EVENT_WAS_SENT) {

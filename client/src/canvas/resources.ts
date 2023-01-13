@@ -1,10 +1,11 @@
-import { ISpritesheetData, ISpritesheetFrameData, Spritesheet, BaseTexture, Texture } from 'pixi.js';
+import { ISpritesheetData, ISpritesheetFrameData, Spritesheet, BaseTexture, Texture, Rectangle } from 'pixi.js';
 
 import dragonGreenImage from 'url:../assets/dragon_green.png';
 import dragonBlueImage from 'url:../assets/dragon_blue.png';
 import skyImage from 'url:../assets/sky.png';
 import mountainImage from 'url:../assets/mountain.png';
 import fireballsImage from 'url:../assets/origin.png';
+import groundImage from 'url:../assets/ground_tileset.png';
 
 import { DRAGON_SIDE_X, DRAGON_SIDE_Y, FIREBALL_SIDE_X, FIREBALL_SIDE_Y } from './constants';
 
@@ -67,12 +68,18 @@ export const resources:
     sky: Texture,
     mountain: Texture,
     fireball: Spritesheet,
+    groundBorderLight: Texture,
+    groundBorderDark: Texture,
+    ground: Texture,
 } = {
     dragonGreen: null,
     dragonBlue: null,
     sky: null,
     mountain: null,
     fireball: null,
+    groundBorderLight: null,
+    groundBorderDark: null,
+    ground: null,
 };
 
 export async function loadResources() {
@@ -102,4 +109,9 @@ export async function loadResources() {
 
     resources.sky = Texture.from(skyImage);
     resources.mountain = Texture.from(mountainImage);
+
+    const groundBaseTexture = BaseTexture.from(groundImage);
+    resources.groundBorderLight = new Texture(groundBaseTexture, new Rectangle(145, 0, 15, 64));
+    resources.groundBorderDark = new Texture(groundBaseTexture, new Rectangle(175, 0, 15, 64));
+    resources.ground = new Texture(groundBaseTexture, new Rectangle(0, 160, 15, 15));
 }

@@ -10,6 +10,8 @@ import { Fireball } from './fireball';
 
 export class World implements WorldUpdatable {
     isGamePlaying: boolean = false;
+    myPlayerId: string;
+
     dragons: {[playerId: string]: Dragon} = {};
     fireballs: Fireball[] = [];
     level: Level;
@@ -24,12 +26,12 @@ export class World implements WorldUpdatable {
         ).setTranslation(0, WORLD_SIDE_Y);
         this.physicsWorld.createCollider(groundColliderDesc);
 
-        this.level = new Level(camera);
+        this.level = new Level(camera, this.physicsWorld);
         this.debugGraphics = new Graphics();
         camera.addChild(this.debugGraphics);
     }
 
-    createCharacter(playerId: string, isPlayer: boolean): void {
+    createCharacter(playerId: string): void {
         console.log('Create', Object.keys(this.dragons), playerId);
         if (this.dragons.hasOwnProperty(playerId)) {
             console.log('Such player already exists', playerId);
@@ -46,7 +48,7 @@ export class World implements WorldUpdatable {
         dragon.update();
         this.dragons[playerId] = dragon;
 
-        if (isPlayer) {
+        if (this.myPlayerId === playerId) {
             this.camera.follow(dragon.get(), {
                 speed: 0,
                 acceleration: null,
@@ -82,6 +84,10 @@ export class World implements WorldUpdatable {
 
     setIsGamePlaying(isGamePlaying: boolean) {
         this.isGamePlaying = isGamePlaying;
+    }
+
+    setMyPlayerId(myPlayerId: string) {
+        this.myPlayerId = myPlayerId;
     }
 
     update() {
