@@ -2,6 +2,8 @@ import { ISpritesheetData, ISpritesheetFrameData, Spritesheet, BaseTexture, Text
 
 import dragonGreenImage from 'url:../assets/dragon_green.png';
 import dragonBlueImage from 'url:../assets/dragon_blue.png';
+import dragonRedImage from 'url:../assets/dragon_red.png';
+import dragonBlackImage from 'url:../assets/dragon_night.png';
 import skyImage from 'url:../assets/sky.png';
 import mountainImage from 'url:../assets/mountain.png';
 import fireballsImage from 'url:../assets/origin.png';
@@ -10,6 +12,24 @@ import groundImage from 'url:../assets/ground_tileset.png';
 import { DRAGON_SIDE_X, DRAGON_SIDE_Y, FIREBALL_SIDE_X, FIREBALL_SIDE_Y } from './constants';
 
 type GenerateFrameResultType = {[id: string]: ISpritesheetFrameData};
+
+type ResourcesSpritesheet = {
+    dragonGreen: Spritesheet,
+    dragonBlue: Spritesheet,
+    dragonRed: Spritesheet,
+    dragonBlack: Spritesheet,
+    fireball: Spritesheet,
+};
+
+type ResourcesTexture = {
+    sky: Texture,
+    mountain: Texture,
+    groundBorderLight: Texture,
+    groundBorderDark: Texture,
+    ground: Texture,
+};
+
+type Resources = ResourcesSpritesheet & ResourcesTexture;
 
 function generateFrames(
     name: string,
@@ -37,6 +57,16 @@ function generateAnimationNames(name: string, frame_count: number): string[] {
     return result;
 }
 
+async function addDragonToResources(resourceName: keyof ResourcesSpritesheet, image: HTMLImageElement) {
+    const dragonBaseTexture = BaseTexture.from(image);
+    const dragonSheet = new Spritesheet(
+        dragonBaseTexture,
+        dragonAtlasData,
+    );
+    await dragonSheet.parse();
+    resources[resourceName] = dragonSheet;
+}
+
 const dragonAtlasData: ISpritesheetData = {
     frames: {
         ...generateFrames('standing', 0, DRAGON_SIDE_X, 8),
@@ -61,19 +91,11 @@ const fireballAtlasData: ISpritesheetData = {
     },
 };
 
-export const resources:
-{
-    dragonGreen: Spritesheet,
-    dragonBlue: Spritesheet,
-    sky: Texture,
-    mountain: Texture,
-    fireball: Spritesheet,
-    groundBorderLight: Texture,
-    groundBorderDark: Texture,
-    ground: Texture,
-} = {
+export const resources: Resources = {
     dragonGreen: null,
     dragonBlue: null,
+    dragonRed: null,
+    dragonBlack: null,
     sky: null,
     mountain: null,
     fireball: null,
@@ -83,21 +105,10 @@ export const resources:
 };
 
 export async function loadResources() {
-    const dragonGreenBaseTexture = BaseTexture.from(dragonGreenImage);
-    const dragonGreenSheet = new Spritesheet(
-        dragonGreenBaseTexture,
-        dragonAtlasData,
-    );
-    await dragonGreenSheet.parse();
-    resources.dragonGreen = dragonGreenSheet;
-
-    const dragonBlueBaseTexture = BaseTexture.from(dragonBlueImage);
-    const dragonBlueSheet = new Spritesheet(
-        dragonBlueBaseTexture,
-        dragonAtlasData,
-    );
-    await dragonBlueSheet.parse();
-    resources.dragonBlue = dragonBlueSheet;
+    await addDragonToResources('dragonGreen', dragonGreenImage);
+    await addDragonToResources('dragonBlue', dragonBlueImage);
+    await addDragonToResources('dragonRed', dragonRedImage);
+    await addDragonToResources('dragonBlack', dragonBlackImage);
 
     const fireballBaseTexture = BaseTexture.from(fireballsImage);
     const fireballSheet = new Spritesheet(

@@ -14,17 +14,18 @@ import {
 } from '../canvas';
 import { FireballOptions } from './fireball';
 
-export enum DragonType {
-    GREEN = 'green',
-    BLUE = 'blue',
-}
+export type DragonOptions = {
+    resource: Spritesheet,
+    position: Rapier.Vector,
+};
 
 export class Dragon implements Movable {
     flyingSprite: AnimatedSprite;
     rigidBody: Rapier.RigidBody;
 
-    constructor(public camera: Viewport, public physics: Rapier.World, resource: Spritesheet, positionStart: Rapier.Vector) {
-        this.flyingSprite = new AnimatedSprite(resource.animations.flying);
+    constructor(public camera: Viewport, public physics: Rapier.World, options: DragonOptions) {
+        console.log('Options', options);
+        this.flyingSprite = new AnimatedSprite(options.resource.animations.flying);
         this.flyingSprite.scale.set(0.5);
         this.flyingSprite.animationSpeed = 0.3;
         this.flyingSprite.loop = false;
@@ -33,7 +34,7 @@ export class Dragon implements Movable {
         this.camera.addChild(this.flyingSprite);
 
         let rigidBodyDesc = Rapier.RigidBodyDesc.dynamic()
-            .setTranslation(positionStart.x, positionStart.y);
+            .setTranslation(options.position.x, options.position.y);
         this.rigidBody = physics.createRigidBody(rigidBodyDesc);
 
         let colliderDesc = Rapier.ColliderDesc.capsule(0.5, 0.5).setDensity(1.0);

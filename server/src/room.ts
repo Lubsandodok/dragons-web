@@ -56,7 +56,7 @@ export class Room {
             event: PlayerEvent.NONE,
         };
         this.players[playerId] = player;
-        console.log('Player was added', playerId);
+        console.log('Player was added', playerId, Object.keys(this.players).length, this.expectedPlayersCount);
     }
 
     removePlayer(playerId: string) {
@@ -80,11 +80,13 @@ export class Room {
     }
 
     getGamePlaying() : boolean {
-//        console.log(Object.keys(this.players).length, this.expectedPlayersCount);
+        // console.log(Object.keys(this.players).length, this.expectedPlayersCount);
         return Object.keys(this.players).length === this.expectedPlayersCount;
     }
 
     setGamePlaying(isGamePlaying: boolean) {
+        console.log('SetGamePlaying', isGamePlaying);
+        console.log('GamePlaying', Object.keys(this.players).length, this.expectedPlayersCount);
         this.isGamePlaying = isGamePlaying;
     }
 

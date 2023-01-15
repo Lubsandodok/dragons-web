@@ -44,7 +44,7 @@ const app = App({
                 };
                 room.sendToAll(GameMethod.PLAYER_WAS_JOINED, playerWasJoined);
                 room.setGamePlaying(isGamePlaying);
-                console.log('Joined with id:', playerId);
+                console.log('Joined with id:', playerId, isGamePlaying);
             } else {
                 console.log('Error. Room was not found', roomId);
             }
@@ -76,7 +76,7 @@ const app = App({
     readJson(res, (obj: any) => {
         console.log('Posted to', obj);
         const roomId = v4();
-        rooms[roomId] = new Room(roomId, obj.expected_player_count);
+        rooms[roomId] = new Room(roomId, parseInt(obj.expected_player_count));
         res.end(JSON.stringify({'room_id': roomId}));
         console.log('Created room with id: ' + roomId);
     }, () => {

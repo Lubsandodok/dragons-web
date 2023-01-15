@@ -3,7 +3,7 @@ import { Viewport } from 'pixi-viewport';
 import Rapier from '@dimforge/rapier2d-compat';
 
 import { resources, WORLD_SIDE_X, WORLD_SIDE_Y, PlayerEvent } from '../canvas';
-import { Dragon } from './dragon';
+import { Dragon, DragonOptions } from './dragon';
 import { Level } from './level';
 import { Controls, WorldUpdatable } from '../controls';
 import { Fireball } from './fireball';
@@ -38,12 +38,7 @@ export class World implements WorldUpdatable {
             return;
         }
 
-        const dragon = new Dragon(
-            this.camera,
-            this.physicsWorld,
-            this.getCurrentDragonResource(),
-            this.getCurrentDragonStartPosition(),
-        );
+        const dragon = new Dragon(this.camera, this.physicsWorld, this.getDragonOptions());
 //        dragon.applyGravity();
         dragon.update();
         this.dragons[playerId] = dragon;
@@ -123,23 +118,23 @@ export class World implements WorldUpdatable {
         }
     }
 
-    private getCurrentDragonResource(): Spritesheet {
-        // dragons should have different colors
-        const length = Object.keys(this.dragons).length;
-        console.log(length);
-        if (length === 0) {
-            return resources.dragonGreen;
-        } else if (length === 1) {
-            return resources.dragonBlue;
+    private getDragonOptions() : DragonOptions {
+        function generateOptions(resource: Spritesheet, x_shift: number) : DragonOptions {
+            return {
+                resource: resource,
+                position: new Rapier.Vector2(WORLD_SIDE_X / 2 + x_shift, WORLD_SIDE_Y / 2),
+            };
         }
-    }
 
-    private getCurrentDragonStartPosition(): Rapier.Vector2 {
         const length = Object.keys(this.dragons).length;
         if (length === 0) {
-            return new Rapier.Vector2(WORLD_SIDE_X / 2 - 100, WORLD_SIDE_Y / 2);
+            return generateOptions(resources.dragonGreen, -200);
         } else if (length === 1) {
-            return new Rapier.Vector2(WORLD_SIDE_X / 2 + 100, WORLD_SIDE_Y / 2);
+            return generateOptions(resources.dragonBlue, -100);
+        } else if (length === 2) {
+            return generateOptions(resources.dragonRed, 100);
+        } else if (length === 3) {
+            return generateOptions(resources.dragonBlack, 200);
         }
     }
 
