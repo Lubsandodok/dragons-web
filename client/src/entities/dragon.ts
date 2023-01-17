@@ -11,6 +11,7 @@ import {
     multiplyVector,
     rotateRightVector,
     computeRotationVector,
+    Physical,
 } from '../canvas';
 import { FireballOptions } from './fireball';
 
@@ -19,9 +20,10 @@ export type DragonOptions = {
     position: Rapier.Vector,
 };
 
-export class Dragon implements Movable {
+export class Dragon implements Physical, Movable {
     flyingSprite: AnimatedSprite;
     rigidBody: Rapier.RigidBody;
+    collider: Rapier.Collider;
 
     constructor(public camera: Viewport, public physics: Rapier.World, options: DragonOptions) {
         console.log('Options', options);
@@ -38,7 +40,7 @@ export class Dragon implements Movable {
         this.rigidBody = physics.createRigidBody(rigidBodyDesc);
 
         let colliderDesc = Rapier.ColliderDesc.capsule(0.5, 0.5).setDensity(1.0);
-        let collider = physics.createCollider(colliderDesc, this.rigidBody);
+        this.collider = physics.createCollider(colliderDesc, this.rigidBody);
     }
 
     moveUp(): void {
@@ -81,6 +83,10 @@ export class Dragon implements Movable {
             velocity: this.rigidBody.linvel(),
             angular: this.rigidBody.angvel(),
         };
+    }
+
+    getHandle(): number {
+        return this.collider.handle;
     }
 
     update() {

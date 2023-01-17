@@ -5,7 +5,6 @@ import dragonBlueImage from 'url:../assets/dragon_blue.png';
 import dragonRedImage from 'url:../assets/dragon_red.png';
 import dragonBlackImage from 'url:../assets/dragon_night.png';
 import skyImage from 'url:../assets/sky.png';
-import mountainImage from 'url:../assets/mountain.png';
 import fireballsImage from 'url:../assets/origin.png';
 import groundImage from 'url:../assets/ground_tileset.png';
 
@@ -23,7 +22,6 @@ type ResourcesSpritesheet = {
 
 type ResourcesTexture = {
     sky: Texture,
-    mountain: Texture,
     groundBorderLight: Texture,
     groundBorderDark: Texture,
     ground: Texture,
@@ -97,7 +95,6 @@ export const resources: Resources = {
     dragonRed: null,
     dragonBlack: null,
     sky: null,
-    mountain: null,
     fireball: null,
     groundBorderLight: null,
     groundBorderDark: null,
@@ -119,7 +116,6 @@ export async function loadResources() {
     resources.fireball = fireballSheet;
 
     resources.sky = Texture.from(skyImage);
-    resources.mountain = Texture.from(mountainImage);
 
     const groundBaseTexture = BaseTexture.from(groundImage);
     resources.groundBorderLight = new Texture(groundBaseTexture, new Rectangle(145, 0, 15, 64));

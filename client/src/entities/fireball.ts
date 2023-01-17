@@ -2,7 +2,7 @@ import { AnimatedSprite } from 'pixi.js';
 import Rapier from '@dimforge/rapier2d-compat';
 import { Viewport } from 'pixi-viewport';
 
-import { resources, FIREBALL_SIDE_X, FIREBALL_SIDE_Y, unitVector, rotateRightVector, multiplyVector, computeRotationVector } from '../canvas';
+import { resources, FIREBALL_SIDE_X, FIREBALL_SIDE_Y, unitVector, rotateRightVector, multiplyVector, computeRotationVector, Physical } from '../canvas';
 
 export type FireballOptions = {
     position: Rapier.Vector,
@@ -11,9 +11,10 @@ export type FireballOptions = {
     angular: number,
 };
 
-export class Fireball {
+export class Fireball implements Physical {
     sprite: AnimatedSprite;
     rigidBody: Rapier.RigidBody;
+    collider: Rapier.Collider;
     options: FireballOptions; // TODO: remove it
 
     constructor(
@@ -36,7 +37,7 @@ export class Fireball {
         this.rigidBody = physics.createRigidBody(rigidBodyDesc);
 
         let colliderDesc = Rapier.ColliderDesc.ball(0.2).setDensity(1.0);
-        let collider = physics.createCollider(colliderDesc, this.rigidBody);
+        this.collider = physics.createCollider(colliderDesc, this.rigidBody);
 
         this.options = options;
     }
@@ -44,6 +45,10 @@ export class Fireball {
     fire() {
         const rotationVector = computeRotationVector(this.options.rotation);
         this.rigidBody.applyImpulse(multiplyVector(rotationVector, 70), false);
+    }
+
+    getHandle(): number {
+        return this.collider.handle;
     }
 
     update() {

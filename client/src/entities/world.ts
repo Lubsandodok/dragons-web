@@ -2,7 +2,7 @@ import { Graphics, Spritesheet } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 import Rapier from '@dimforge/rapier2d-compat';
 
-import { resources, WORLD_SIDE_X, WORLD_SIDE_Y, PlayerEvent } from '../canvas';
+import { resources, WORLD_SIDE_X, WORLD_SIDE_Y, PlayerEvent, Physical } from '../canvas';
 import { Dragon, DragonOptions } from './dragon';
 import { Level } from './level';
 import { Controls, WorldUpdatable } from '../controls';
@@ -15,17 +15,17 @@ export class World implements WorldUpdatable {
     dragons: {[playerId: string]: Dragon} = {};
     fireballs: Fireball[] = [];
     level: Level;
+
     physicsWorld: Rapier.World;
+    physicsHandles: {[handle: number]: Physical} = {};
+    eventQueue: Rapier.EventQueue;
+
     debugGraphics: Graphics;
 
     constructor(public camera: Viewport, public controls: Controls) {
         const gravity = {x: 0.0, y: 20};
         this.physicsWorld = new Rapier.World(gravity);
-        let groundColliderDesc = Rapier.ColliderDesc.cuboid(
-            WORLD_SIDE_X, 10
-        ).setTranslation(0, WORLD_SIDE_Y);
-        this.physicsWorld.createCollider(groundColliderDesc);
-
+        this.eventQueue = new Rapier.EventQueue(true);
         this.level = new Level(camera, this.physicsWorld);
         this.debugGraphics = new Graphics();
         camera.addChild(this.debugGraphics);
@@ -39,7 +39,6 @@ export class World implements WorldUpdatable {
         }
 
         const dragon = new Dragon(this.camera, this.physicsWorld, this.getDragonOptions());
-//        dragon.applyGravity();
         dragon.update();
         this.dragons[playerId] = dragon;
 
@@ -49,7 +48,6 @@ export class World implements WorldUpdatable {
                 acceleration: null,
                 radius: null,
             })
-//            this.controls.subscribePlayer(dragon);
         }
     }
 
@@ -90,7 +88,16 @@ export class World implements WorldUpdatable {
             return;
         }
 
-        this.physicsWorld.step();
+        // TODO
+        this.physicsWorld.step(this.eventQueue);
+
+        this.eventQueue.drainCollisionEvents((handle1: number, handle2: number, started: boolean) => {
+            console.log('Collision', handle1, handle2);
+        });
+
+        this.eventQueue.drainContactForceEvents(event => {
+            console.log('Contact forces', event);
+        });
 
         for (const playerId in this.dragons) {
             this.dragons[playerId].update();
