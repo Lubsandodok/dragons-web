@@ -38,8 +38,8 @@ class App extends React.Component {
             this.setState({isRoomsVisible: false});
         }
 
-//      debug
-//        this.setState({isRoomsVisible: false});
+    //  debug
+        // this.setState({isRoomsVisible: false});
 
         return Promise.resolve();
     }

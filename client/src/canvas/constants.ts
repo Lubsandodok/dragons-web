@@ -6,6 +6,7 @@ export const SKY_SIDE_X = 1920;
 export const SKY_SIDE_Y = 1080;
 export const WORLD_SIDE_X = SKY_SIDE_X * 3;
 export const WORLD_SIDE_Y = SKY_SIDE_Y * 6;
+export const GROUND_WIDTH = 50;
 
 export enum PlayerEvent {
     NONE = 'NONE',

@@ -27,8 +27,18 @@ export class World implements WorldUpdatable {
         this.physicsWorld = new Rapier.World(gravity);
         this.eventQueue = new Rapier.EventQueue(true);
         this.level = new Level(camera, this.physicsWorld);
-        this.debugGraphics = new Graphics();
+        this.debugGraphics = new Graphics();        
         camera.addChild(this.debugGraphics);
+
+        this.camera.moveCenter(WORLD_SIDE_X / 2, WORLD_SIDE_Y / 2);
+        this.camera.clamp({
+            left: 0,
+            right: WORLD_SIDE_X,
+            top: 0,
+            bottom: WORLD_SIDE_Y,
+            direction: 'all',
+            underflow: 'center',
+        });
     }
 
     createCharacter(playerId: string): void {
@@ -42,13 +52,13 @@ export class World implements WorldUpdatable {
         dragon.update();
         this.dragons[playerId] = dragon;
 
-        if (this.myPlayerId === playerId) {
-            this.camera.follow(dragon.get(), {
-                speed: 0,
-                acceleration: null,
-                radius: null,
-            })
-        }
+        // if (this.myPlayerId === playerId) {
+        //     this.camera.follow(dragon.get(), {
+        //         speed: 0,
+        //         acceleration: null,
+        //         radius: null,
+        //     })
+        // }
     }
 
     moveCharacter(playerId: string, event: string): void {

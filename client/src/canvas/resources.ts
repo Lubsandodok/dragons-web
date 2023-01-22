@@ -118,7 +118,7 @@ export async function loadResources() {
     resources.sky = Texture.from(skyImage);
 
     const groundBaseTexture = BaseTexture.from(groundImage);
-    resources.groundBorderLight = new Texture(groundBaseTexture, new Rectangle(145, 0, 15, 64));
-    resources.groundBorderDark = new Texture(groundBaseTexture, new Rectangle(175, 0, 15, 64));
+    resources.groundBorderLight = new Texture(groundBaseTexture, new Rectangle(147, 0, 13, 64));
+    resources.groundBorderDark = new Texture(groundBaseTexture, new Rectangle(176, 0, 13, 64));
     resources.ground = new Texture(groundBaseTexture, new Rectangle(0, 160, 15, 15));
 }
