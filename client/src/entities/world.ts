@@ -52,13 +52,13 @@ export class World implements WorldUpdatable {
         dragon.update();
         this.dragons[playerId] = dragon;
 
-        // if (this.myPlayerId === playerId) {
-        //     this.camera.follow(dragon.get(), {
-        //         speed: 0,
-        //         acceleration: null,
-        //         radius: null,
-        //     })
-        // }
+        if (this.myPlayerId === playerId) {
+            this.camera.follow(dragon.get(), {
+                speed: 0,
+                acceleration: null,
+                radius: null,
+            })
+        }
     }
 
     moveCharacter(playerId: string, event: string): void {
