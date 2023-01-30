@@ -9,17 +9,17 @@
 
 class Room final {
 public:
-    Room(uint8_t expected_player_count);
-    ~Room() = default;
+    Room(uint8_t expected_player_count_arg);
+    ~Room();
 
-    void applyCommand(std::unique_ptr<Command> command);
+    void applyCommand(std::shared_ptr<Command> command);
 
     const std::string& getId() const;
 private:
     RoomId id;
     uint8_t expected_player_count = 0;
-    RoomState state;
-    std::vector<std::unique_ptr<Command>> commands;
+    RoomState current_state;
+    std::vector<std::shared_ptr<Command>> commands;
 };
 
 #endif // ROOM_H

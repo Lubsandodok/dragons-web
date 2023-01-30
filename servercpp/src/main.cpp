@@ -1,25 +1,25 @@
 #include <iostream>
 #include <ctime>
+
 #include <App.h>
 #include <HttpResponse.h>
+
+#include "defs.h"
 #include "room_manager.h"
 
 int main() {
 	RoomManager manager;
 	uWS::SocketContextOptions options = {};
-	struct PerSocketData {
-
-	};
 
 	uWS::App app = uWS::App(options).ws<PerSocketData>("/room/join", {
 		.open = [](auto* ws) {
 			std::cout << "Open" << std::endl;
 		},
 		.message = [&manager](auto* ws, std::string_view message, uWS::OpCode opCode) {
-			manager.on_message(message);
+			manager.on_message(ws, message);
 		},
 		.close = [&manager](auto* ws, int code, std::string_view message) {
-			manager.on_close();
+			manager.on_close(ws);
 		}
 	}).post("/room/create", [&manager](uWS::HttpResponse<false>* response, uWS::HttpRequest* request) {
 		manager.create_room(0);

@@ -5,12 +5,19 @@
 
 class Command {
 public:
-    Command(const std::string& room_id);
     virtual ~Command() = default;
 
     virtual void apply(RoomState& state) const = 0;
+};
+
+class CreatePlayerCommand final : public Command {
+public:
+    CreatePlayerCommand(WebSocket* ws_arg, const PlayerId& player_id_arg);
+
+    void apply(RoomState& state);
 private:
-    std::string room_id;
+    WebSocket* ws;
+    PlayerId player_id;
 };
 
 class StartRoomCommand final : public Command {
