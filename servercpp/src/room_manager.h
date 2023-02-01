@@ -10,9 +10,10 @@
 
 class RoomManager final {
 public:
-    RoomId create_room(uint8_t expected_player_count);
+    std::string create_room(std::string_view body);
     void on_message(WebSocket* ws, std::string_view message);
     void on_close(WebSocket* ws);
+    void on_event_loop();
 private:
     std::unordered_map<RoomId, std::shared_ptr<Room>> rooms;
 };
