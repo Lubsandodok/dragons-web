@@ -48,7 +48,7 @@ const app = App({
             } else {
                 console.log('Error. Room was not found', roomId);
             }
-        } else if (data.method === GameMethod.SEND_PLAYER_EVENT) {
+        } else if (data.method === GameMethod.SEND_PLAYER_EVENT && rooms[ws.roomId].getGamePlaying()) {
             const playerId = ws.playerId;
             const room = rooms[ws.roomId];
 
@@ -100,6 +100,7 @@ setInterval(() => {
             const messageToSend: PlayerEventWasSentResponse = {players: room.getAllCurrentEvents()};
             room.sendToAll(GameMethod.PLAYER_EVENT_WAS_SENT, messageToSend);
             room.clearAllCurrentEvents();
+            console.log('Event loop step');
         }
     }
-}, 33);
+}, 1000);

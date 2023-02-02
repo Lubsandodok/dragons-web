@@ -43,6 +43,49 @@ std::string create_room() {
     return responseObject["room_id"];
 }
 
+void create_ws_connection_with_moves(const std::string& room_id) {
+    HTTPClientSession session("localhost", 9001);
+    HTTPRequest request(HTTPRequest::HTTP_GET, "/room/join", HTTPMessage::HTTP_1_1);
+    HTTPResponse response;
+
+    json body_to_join = {
+        {"method", "JOIN_ROOM"},
+        {"parameters", {{"room_id", room_id}}},
+    };
+    std::string message = body_to_join.dump();
+    
+
+    json body_to_move = {
+        {"method", "SEND_PLAYER_EVENT"},
+        {"parameters", {{"event", "DRAGON_MOVE"}}},
+    };
+    std::string message_move = body_to_move.dump();
+    // std::cout << message_move << std::endl;
+
+    try {
+        WebSocket* ws = new WebSocket(session, request, response);
+        // dangerous place. Maybe length() is not possible to use here.
+        int length = ws->sendFrame(message.c_str(), message.length(), WebSocket::FRAME_TEXT);
+        std::cout << "<-" << message << std::endl;
+        int flags = 0;
+
+        int responsePayloadSize = 2000;
+        Poco::Buffer<char> buffer(0);
+        while (true) {
+            buffer.resize(0);
+            length = ws->sendFrame(message_move.c_str(), message_move.length(), WebSocket::FRAME_TEXT);
+            length = ws->receiveFrame(buffer, flags);
+            // if (length != 0) {
+            //     std::string responseString(buffer.begin(), buffer.end());
+            //     std::cout << "Length: " << length << "Got: " << responseString << std::endl;
+            // }
+        }
+
+    } catch (std::exception& exc) {
+        std::cout << "Exception: " << exc.what() << std::endl;
+    }
+}
+
 void create_ws_connection(const std::string& room_id) {
     HTTPClientSession session("localhost", 9001);
     HTTPRequest request(HTTPRequest::HTTP_GET, "/room/join", HTTPMessage::HTTP_1_1);
@@ -53,7 +96,7 @@ void create_ws_connection(const std::string& room_id) {
         {"parameters", {{"room_id", room_id}}},
     };
     std::string message = body_to_join.dump();
-    std::cout << message << std::endl;
+    std::cout << "<-" << message << std::endl;
 
     try {
         WebSocket* ws = new WebSocket(session, request, response);
@@ -64,11 +107,11 @@ void create_ws_connection(const std::string& room_id) {
         int responsePayloadSize = 2000;
         Poco::Buffer<char> buffer(0);
         while (true) {
-            buffer.clear();
+            buffer.resize(0);
             length = ws->receiveFrame(buffer, flags);
             if (length != 0) {
                 std::string responseString(buffer.begin(), buffer.end());
-                std::cout << "Length: " << length << "Got: " << responseString << std::endl;
+                std::cout << "->" << "Length: " << length << "Got: " << responseString << std::endl;
             }
         }
 
@@ -82,7 +125,7 @@ int main(int argc, char** argv) {
     std::string room_id = create_room();
 
     std::vector<std::thread> threads;
-    threads.push_back(std::thread(create_ws_connection, room_id));
+    threads.push_back(std::thread(create_ws_connection_with_moves, room_id));
     threads.push_back(std::thread(create_ws_connection, room_id));
 
     for (auto& t : threads) {

@@ -1,2 +1,2 @@
 build:
-	clang++ main.cpp -lPocoFoundation -lPocoNet -o main
+	clang++ stable_work_scenario.cpp -lPocoFoundation -lPocoNet -lpthread -o main
