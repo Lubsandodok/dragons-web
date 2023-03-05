@@ -19,6 +19,7 @@ enum BorderSide {
 
 export class Level implements Physical {
     background: Container;
+    collider: Rapier.Collider;
 
     constructor(public camera: Viewport, public physics: Rapier.World) {      
         const skySpriteHigh = new Sprite(resources.sky);
@@ -42,22 +43,25 @@ export class Level implements Physical {
 
         this.setUpPhysicsForBorder(leftBorder);
         this.setUpPhysicsForBorder(rightBorder);
-        this.setUpPhysicsForBorder(downBorder);
+        this.collider = this.setUpPhysicsForBorder(downBorder);
 
-        console.log('Back: ', this.background);
+        console.log('Back: ', this.collider);
 
         console.log('Camera world width', this.background.width);
         console.log('Camera world height', this.background.height);
     }
 
-    private setUpPhysicsForBorder(border: Container) : number {
+    private setUpPhysicsForBorder(border: Container) : Rapier.Collider {
         console.log('Object', border);
-        const borderColliderDesc = Rapier.ColliderDesc.cuboid(border.width, border.height)
+        const rigidBodyDesc = Rapier.RigidBodyDesc.fixed()
             .setRotation(border.rotation)
             .setTranslation(border.x, border.y);
+        const rigidBody = this.physics.createRigidBody(rigidBodyDesc);
+        const borderColliderDesc = Rapier.ColliderDesc.cuboid(border.width, border.height);
         borderColliderDesc.setActiveEvents(Rapier.ActiveEvents.COLLISION_EVENTS);
-        const collider = this.physics.createCollider(borderColliderDesc);
-        return collider.handle;
+        const collider = this.physics.createCollider(borderColliderDesc, rigidBody);
+        console.log(collider.handle);
+        return collider;
     }
 
     setUpLevelPhysicsForContainers() {
@@ -166,8 +170,7 @@ export class Level implements Physical {
     // }
 
     getHandle(): number {
-        // TODO
-        return 0;
+        return this.collider.handle;
     }
 
     destroy() {

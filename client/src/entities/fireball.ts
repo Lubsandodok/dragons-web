@@ -58,4 +58,10 @@ export class Fireball implements Physical {
         this.sprite.position = {x: position.x, y: position.y};
         this.sprite.rotation = rotation;
     }
+
+    destroy() {
+        this.physics.removeCollider(this.collider, false);
+        this.physics.removeRigidBody(this.rigidBody);
+        this.sprite.destroy();
+    }
 }

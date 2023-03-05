@@ -2,22 +2,18 @@ import { Graphics, Spritesheet } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 import Rapier from '@dimforge/rapier2d-compat';
 
-import { resources, WORLD_SIDE_X, WORLD_SIDE_Y, PlayerEvent, Physical } from '../canvas';
-import { Dragon, DragonOptions } from './dragon';
-import { Level } from './level';
+import { resources, WORLD_SIDE_X, WORLD_SIDE_Y, PlayerEvent } from '../canvas';
 import { Controls, WorldUpdatable } from '../controls';
-import { Fireball } from './fireball';
+import { EntityManager } from './entitymanager';
+import { DragonOptions } from './dragon';
 
 export class World implements WorldUpdatable {
     isGamePlaying: boolean = false;
     myPlayerId: string;
 
-    dragons: {[playerId: string]: Dragon} = {};
-    fireballs: Fireball[] = [];
-    level: Level;
+    entityManager: EntityManager;
 
     physicsWorld: Rapier.World;
-    physicsHandles: {[handle: number]: Physical} = {};
     eventQueue: Rapier.EventQueue;
 
     debugGraphics: Graphics;
@@ -26,8 +22,8 @@ export class World implements WorldUpdatable {
         const gravity = {x: 0.0, y: 20};
         this.physicsWorld = new Rapier.World(gravity);
         this.eventQueue = new Rapier.EventQueue(true);
-        this.level = new Level(camera, this.physicsWorld);
         this.debugGraphics = new Graphics();        
+        this.entityManager = new EntityManager(camera, this.physicsWorld);
         camera.addChild(this.debugGraphics);
 
         this.camera.moveCenter(WORLD_SIDE_X / 2, WORLD_SIDE_Y / 2);
@@ -42,15 +38,11 @@ export class World implements WorldUpdatable {
     }
 
     createCharacter(playerId: string): void {
-        console.log('Create', Object.keys(this.dragons), playerId);
-        if (this.dragons.hasOwnProperty(playerId)) {
-            console.log('Such player already exists', playerId);
+        const dragon = this.entityManager.createDragon(playerId, this.getDragonOptions());
+        if (dragon === null) {
             return;
         }
-
-        const dragon = new Dragon(this.camera, this.physicsWorld, this.getDragonOptions());
         dragon.update();
-        this.dragons[playerId] = dragon;
 
         if (this.myPlayerId === playerId) {
             this.camera.follow(dragon.get(), {
@@ -62,7 +54,7 @@ export class World implements WorldUpdatable {
     }
 
     moveCharacter(playerId: string, event: string): void {
-        const dragon = this.dragons[playerId];
+        const dragon = this.entityManager.getDragon(playerId);
         if (event === PlayerEvent.DRAGON_MOVE) {
             dragon.moveUp();
         } else if (event === PlayerEvent.DRAGON_LEFT) {
@@ -74,14 +66,8 @@ export class World implements WorldUpdatable {
 
     createFireball(playerId: string) {
         console.log('Create fireball for', playerId);
-        const dragon = this.dragons[playerId];
-
-        const fireball = new Fireball(
-            this.camera, this.physicsWorld, dragon.getFireballOptions(),
-        );
+        const fireball = this.entityManager.createFireball(playerId);
         fireball.update();
-        this.fireballs.push(fireball);
-
         fireball.fire();
     }
 
@@ -102,19 +88,14 @@ export class World implements WorldUpdatable {
         this.physicsWorld.step(this.eventQueue);
 
         this.eventQueue.drainCollisionEvents((handle1: number, handle2: number, started: boolean) => {
-            console.log('Collision', handle1, handle2);
+            this.entityManager.handleCollisionEvent(handle1, handle2);
         });
 
         this.eventQueue.drainContactForceEvents(event => {
             console.log('Contact forces', event);
         });
 
-        for (const playerId in this.dragons) {
-            this.dragons[playerId].update();
-        }
-        for (const fireball of this.fireballs) {
-            fireball.update();
-        }
+        this.entityManager.update();
 
         this.drawDebugGraphics();
     }
@@ -143,7 +124,7 @@ export class World implements WorldUpdatable {
             };
         }
 
-        const length = Object.keys(this.dragons).length;
+        const length = this.entityManager.getDragonsLength();
         if (length === 0) {
             return generateOptions(resources.dragonGreen, -200);
         } else if (length === 1) {
@@ -156,6 +137,5 @@ export class World implements WorldUpdatable {
     }
 
     destroy() {
-        this.level.destroy();
     }
 }
