@@ -29,6 +29,10 @@ export class EntityManager {
         return dragon;
     }
 
+    getEntityByHandle(handle: number) : Physical {
+        return this.handles[handle];
+    }
+
     getDragon(playerId : string) : Dragon {
         return this.dragons[playerId];
     }
@@ -58,16 +62,6 @@ export class EntityManager {
         fireball.destroy();
         delete this.fireballs[handleId];
         delete this.handles[handleId];
-    }
-
-    handleCollisionEvent(handleFirst: number, handleSecond: number) {
-        const first = this.handles[handleFirst];
-        const second = this.handles[handleSecond];
-        if (first instanceof Fireball && second instanceof Level) {
-            this.removeFireball(handleFirst);
-        } else if (first instanceof Level && second instanceof Fireball) {
-            this.removeFireball(handleSecond);
-        }
     }
 
     update() {

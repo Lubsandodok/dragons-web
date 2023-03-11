@@ -1,6 +1,6 @@
-import React from "react";
-import { Canvas, loadResources, loadPhysicsEngine } from "../canvas";
-import { Controls } from "../controls";
+import React from 'react';
+import { Canvas, loadResources, loadPhysicsEngine, LIVES_AT_START, PanelState } from '../canvas';
+import { Controls } from '../controls';
 import Ui from './Ui';
 
 class App extends React.Component {
@@ -8,13 +8,13 @@ class App extends React.Component {
     controls: Controls;
     canvasRef: React.RefObject<HTMLCanvasElement>;
 
-    state: {isRoomsVisible: boolean, link: string};
+    state: {isRoomsVisible: boolean, link: string, panelState: PanelState};
 
     constructor(props: any) {
         super(props);
         this.canvasRef = React.createRef<HTMLCanvasElement>();
 
-        this.state = {isRoomsVisible: true, link: null};
+        this.state = {isRoomsVisible: true, link: null, panelState: {playerLives: LIVES_AT_START}};
     }
 
     async componentDidMount(): Promise<void> {
@@ -27,6 +27,11 @@ class App extends React.Component {
         this.canvas.app.ticker.speed = 1;
         this.canvas.app.ticker.add(() => {
             this.canvas.world.update();
+            const currentPanelState = this.canvas.world.getPanelState();
+            // TODO
+            if (currentPanelState && currentPanelState !== this.state.panelState) {
+                this.setState({panelState: currentPanelState});
+            }
         });
 
         console.log('location', window.location.pathname.split('/'));
@@ -79,6 +84,7 @@ class App extends React.Component {
                     isRoomsVisible={this.state.isRoomsVisible}
                     createRoom={this.createRoom}
                     link={this.state.link}
+                    panelState={this.state.panelState}
                 />
             </div>
         )

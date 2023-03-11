@@ -7,6 +7,7 @@ export const SKY_SIDE_Y = 1080;
 export const WORLD_SIDE_X = SKY_SIDE_X * 3;
 export const WORLD_SIDE_Y = SKY_SIDE_Y * 6;
 export const GROUND_WIDTH = 50;
+export const LIVES_AT_START = 3;
 
 export enum PlayerEvent {
     NONE = 'NONE',
@@ -14,7 +15,7 @@ export enum PlayerEvent {
     DRAGON_LEFT = 'DRAGON_LEFT',
     DRAGON_RIGHT = 'DRAGON_RIGHT',
     CREATE_FIREBALL = 'CREATE_FIREBALL',
-}
+};
 
 export enum GameMethod {
     PLAYER_EVENT_WAS_SENT = 'PLAYER_EVENT_WAS_SENT',
@@ -22,4 +23,8 @@ export enum GameMethod {
     PLAYER_WAS_JOINED = 'PLAYER_WAS_JOINED',
     SEND_PLAYER_EVENT = 'SEND_PLAYER_EVENT',
     FINISH_ROOM = 'FINISH_ROOM',
-}
+};
+
+export type PanelState = {
+    playerLives: number,
+};

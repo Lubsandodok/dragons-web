@@ -5,9 +5,9 @@ import { Viewport } from 'pixi-viewport';
 import { Movable } from '../controls';
 import {
     DRAGON_SIDE_X,
-    DRAGON_SIDE_Y, 
+    DRAGON_SIDE_Y,
+    LIVES_AT_START,
     sumVectors,
-    unitVector,
     multiplyVector,
     rotateRightVector,
     computeRotationVector,
@@ -21,6 +21,7 @@ export type DragonOptions = {
 };
 
 export class Dragon implements Physical, Movable {
+    lives: number = LIVES_AT_START;
     flyingSprite: AnimatedSprite;
     rigidBody: Rapier.RigidBody;
     collider: Rapier.Collider;
@@ -36,10 +37,13 @@ export class Dragon implements Physical, Movable {
         this.camera.addChild(this.flyingSprite);
 
         let rigidBodyDesc = Rapier.RigidBodyDesc.dynamic()
-            .setTranslation(options.position.x, options.position.y);
+            .setTranslation(options.position.x, options.position.y)
+            .setAngularDamping(0.5)
+            .setLinearDamping(0.1);
         this.rigidBody = physics.createRigidBody(rigidBodyDesc);
 
-        let colliderDesc = Rapier.ColliderDesc.capsule(0.5, 0.5).setDensity(1.0);
+        let colliderDesc = Rapier.ColliderDesc.capsule(20, 20).setDensity(1);
+        colliderDesc.setActiveEvents(Rapier.ActiveEvents.COLLISION_EVENTS);
         this.collider = physics.createCollider(colliderDesc, this.rigidBody);
     }
 
@@ -49,7 +53,7 @@ export class Dragon implements Physical, Movable {
             const rotationVector = computeRotationVector(this.rigidBody.rotation());
             const rotationVectorDirected = rotateRightVector(rotationVector);
             console.log('Rotation vector', rotationVector);
-            this.rigidBody.applyImpulse(multiplyVector(rotationVectorDirected, 200), false);
+            this.rigidBody.applyImpulse(multiplyVector(rotationVectorDirected, 120 * 1000), false);
             this.flyingSprite.gotoAndPlay(0);
         }
     }
@@ -58,7 +62,8 @@ export class Dragon implements Physical, Movable {
         console.log('Move left');
         if (!this.flyingSprite.playing) {
             const rotation = this.rigidBody.rotation();
-            this.rigidBody.applyTorqueImpulse(-0.3, false);
+        //    this.rigidBody.applyTorqueImpulse(20 * 20 * -100, false);
+            this.rigidBody.setRotation(rotation - 3.14 / 4, false);
             this.flyingSprite.gotoAndPlay(0);
         }
     }
@@ -67,14 +72,23 @@ export class Dragon implements Physical, Movable {
         console.log('Move right');
         if (!this.flyingSprite.playing) {
             const rotation = this.rigidBody.rotation();
-            this.rigidBody.applyTorqueImpulse(0.3, false);
+            // this.rigidBody.applyTorqueImpulse(20 * 20 * 100, false);
+            this.rigidBody.setRotation(rotation + 3.14 / 4, false);
             this.flyingSprite.gotoAndPlay(0);
         }
     }
 
+    getLives() : number {
+        return this.lives;
+    }
+
+    lowerLives() {
+        this.lives -= 1;
+    }
+
     getFireballOptions(): FireballOptions {
         const rotationVector = computeRotationVector(this.rigidBody.rotation());
-        const positionShift = multiplyVector(rotationVector, 10);
+        const positionShift = multiplyVector(rotationVector, 50);
         const positionShifted = sumVectors(this.rigidBody.translation(), positionShift);
 
         return {

@@ -2,10 +2,12 @@ import { Graphics, Spritesheet } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 import Rapier from '@dimforge/rapier2d-compat';
 
-import { resources, WORLD_SIDE_X, WORLD_SIDE_Y, PlayerEvent } from '../canvas';
+import { resources, WORLD_SIDE_X, WORLD_SIDE_Y, PlayerEvent, PanelState, Physical } from '../canvas';
 import { Controls, WorldUpdatable } from '../controls';
 import { EntityManager } from './entitymanager';
-import { DragonOptions } from './dragon';
+import { Dragon, DragonOptions } from './dragon';
+import { Fireball } from './fireball';
+import { Level } from './level';
 
 export class World implements WorldUpdatable {
     isGamePlaying: boolean = false;
@@ -79,6 +81,32 @@ export class World implements WorldUpdatable {
         this.myPlayerId = myPlayerId;
     }
 
+    getPanelState() : PanelState {
+        if (!this.isGamePlaying) {
+            return;
+        }
+
+        const playerDragon = this.entityManager.getDragon(this.myPlayerId);
+        return {playerLives: playerDragon.getLives()};
+    }
+
+    handleCollisionEvent(handleFirst: number, handleSecond: number) {
+        const first = this.entityManager.getEntityByHandle(handleFirst);
+        const second = this.entityManager.getEntityByHandle(handleSecond);
+        console.log('Collision', first, second);
+        if (first instanceof Fireball && second instanceof Level) {
+            this.entityManager.removeFireball(handleFirst);
+        } else if (first instanceof Level && second instanceof Fireball) {
+            this.entityManager.removeFireball(handleSecond);
+        } else if (first instanceof Fireball && second instanceof Dragon) {
+            second.lowerLives();
+            this.entityManager.removeFireball(handleFirst);
+        } else if (first instanceof Dragon && second instanceof Fireball) {
+            first.lowerLives();
+            this.entityManager.removeFireball(handleSecond);
+        }
+    }
+
     update() {
         if (!this.isGamePlaying) {
             return;
@@ -88,7 +116,7 @@ export class World implements WorldUpdatable {
         this.physicsWorld.step(this.eventQueue);
 
         this.eventQueue.drainCollisionEvents((handle1: number, handle2: number, started: boolean) => {
-            this.entityManager.handleCollisionEvent(handle1, handle2);
+            this.handleCollisionEvent(handle1, handle2);
         });
 
         this.eventQueue.drainContactForceEvents(event => {
