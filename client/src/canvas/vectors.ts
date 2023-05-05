@@ -20,3 +20,7 @@ export function rotateRightVector(a: Rapier.Vector2) : Rapier.Vector2 {
 export function computeRotationVector(rotation: number) : Rapier.Vector2 {
     return new Rapier.Vector2(Math.cos(rotation), Math.sin(rotation));
 }
+
+export function mirrorVector(vec: Rapier.Vector2) : Rapier.Vector2 {
+
+}

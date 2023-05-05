@@ -21,6 +21,7 @@ enum class PlayerEvent : uint8_t {
     DRAGON_MOVE,
     DRAGON_LEFT,
     DRAGON_RIGHT,
+    DRAGON_TURN_BACK,
     CREATE_FIREBALL,
 };
 

@@ -63,6 +63,8 @@ export class World implements WorldUpdatable {
             dragon.moveLeft();
         } else if (event === PlayerEvent.DRAGON_RIGHT) {
             dragon.moveRight();
+        } else if (event === PlayerEvent.DRAGON_TURN_BACK) {
+            dragon.turnBack();
         }
     }
 

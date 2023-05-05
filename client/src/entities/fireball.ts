@@ -22,6 +22,7 @@ export class Fireball implements Physical {
         public physics: Rapier.World,
         options: FireballOptions,
     ) {
+        console.log('Fireball', options);
         this.sprite = new AnimatedSprite(resources.fireball.animations.shot);
         this.sprite.pivot.set(FIREBALL_SIDE_X / 2, FIREBALL_SIDE_Y / 2);
         this.sprite.animationSpeed = 0.3;

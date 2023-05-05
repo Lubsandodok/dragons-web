@@ -23,6 +23,8 @@ function getPlayerEvent(event: KeyboardEvent) {
         return PlayerEvent.DRAGON_RIGHT;
     } else if (event.code === 'Space') {
         return PlayerEvent.CREATE_FIREBALL;
+    } else if (event.code === 'ShiftLeft') {
+        return PlayerEvent.DRAGON_TURN_BACK;
     } else {
         return PlayerEvent.NONE;
     }
@@ -42,9 +44,6 @@ export class Controls {
     onKeyDown(event: KeyboardEvent) {
         if (!this.listenToKeyboard) {
             return;
-        }
-        if (event.code === 'Space') {
-            console.log('Space was pressed');
         }
         console.log('Pressed', event.code);
         const messageToSend = {

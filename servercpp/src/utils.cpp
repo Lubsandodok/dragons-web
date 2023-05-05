@@ -38,6 +38,7 @@ namespace utils {
             {"DRAGON_MOVE", PlayerEvent::DRAGON_MOVE},
             {"DRAGON_LEFT", PlayerEvent::DRAGON_LEFT},
             {"DRAGON_RIGHT", PlayerEvent::DRAGON_RIGHT},
+            {"DRAGON_TURN_BACK", PlayerEvent::DRAGON_TURN_BACK},
             {"CREATE_FIREBALL", PlayerEvent::CREATE_FIREBALL},
         };
 
@@ -56,6 +57,7 @@ namespace utils {
             {PlayerEvent::DRAGON_MOVE, "DRAGON_MOVE"},
             {PlayerEvent::DRAGON_LEFT, "DRAGON_LEFT"},
             {PlayerEvent::DRAGON_RIGHT, "DRAGON_RIGHT"},
+            {PlayerEvent::DRAGON_TURN_BACK, "DRAGON_TURN_BACK"},
             {PlayerEvent::CREATE_FIREBALL, "CREATE_FIREBALL"},
         };
 
