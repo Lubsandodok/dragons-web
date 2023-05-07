@@ -70,12 +70,18 @@ const dragonAtlasData: ISpritesheetData = {
         ...generateFrames('standing', 0, DRAGON_SIDE_X, 8),
         ...generateFrames('walking', DRAGON_SIDE_Y * 1, DRAGON_SIDE_X, 8),
         ...generateFrames('flying', DRAGON_SIDE_Y * 8, DRAGON_SIDE_X, 8),
+        ...generateFrames('beingHit', DRAGON_SIDE_Y * 9, DRAGON_SIDE_X, 5),
+        ...generateFrames('firing', DRAGON_SIDE_Y * 11, DRAGON_SIDE_X, 8),
+        ...generateFrames('dying', DRAGON_SIDE_Y * 12, DRAGON_SIDE_X, 12),
     },
     meta: {scale: '1'},
     animations: {
         standing: generateAnimationNames('standing', 8),
         walking: generateAnimationNames('walking', 8),
         flying: generateAnimationNames('flying', 8),
+        beingHit: generateAnimationNames('beingHit', 5),
+        firing: generateAnimationNames('firing', 8),
+        dying: generateAnimationNames('dying', 12),
     },
 };
 

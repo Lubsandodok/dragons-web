@@ -1,4 +1,4 @@
-import { AnimatedSprite, Spritesheet, PI_2 } from 'pixi.js';
+import { AnimatedSprite, Spritesheet, Container, PI_2 } from 'pixi.js';
 import Rapier from '@dimforge/rapier2d-compat';
 import { Viewport } from 'pixi-viewport';
 
@@ -25,23 +25,28 @@ enum DragonDirection {
     RIGHT = 'RIGHT',
 };
 
+enum DragonSprite {
+    FLYING = 'FLYING',
+    BEING_HIT = 'BEING_HIT',
+    FIRING = 'FIRING',
+    DYING = 'DYING',
+}
+
 export class Dragon implements Physical, Movable {
     lives: number = LIVES_AT_START;
     direction: DragonDirection = DragonDirection.RIGHT;
-    flyingSprite: AnimatedSprite;
+    sprites: {[key in DragonSprite]: AnimatedSprite};
+    currentSpriteName: DragonSprite;
+    visual: Container;
     rigidBody: Rapier.RigidBody;
     collider: Rapier.Collider;
 
-    constructor(public camera: Viewport, public physics: Rapier.World, options: DragonOptions) {
+    constructor(
+        public camera: Viewport,
+        public physics: Rapier.World,
+        options: DragonOptions,
+    ) {
         console.log('Options', options);
-        this.flyingSprite = new AnimatedSprite(options.resource.animations.flying);
-        this.flyingSprite.scale.set(0.5);
-        this.flyingSprite.animationSpeed = 0.3;
-        this.flyingSprite.loop = false;
-        this.flyingSprite.pivot.set(DRAGON_SIDE_X / 2, DRAGON_SIDE_Y / 2);
-
-        this.camera.addChild(this.flyingSprite);
-
         let rigidBodyDesc = Rapier.RigidBodyDesc.dynamic()
             .setTranslation(options.position.x, options.position.y)
             .setAngularDamping(0.5)
@@ -51,44 +56,86 @@ export class Dragon implements Physical, Movable {
         let colliderDesc = Rapier.ColliderDesc.capsule(20, 20).setDensity(1);
         colliderDesc.setActiveEvents(Rapier.ActiveEvents.COLLISION_EVENTS);
         this.collider = physics.createCollider(colliderDesc, this.rigidBody);
+
+        this.initSprites(options);
+    }
+
+    private initSprites(options: DragonOptions): void {
+        const visual = new Container();
+        const animations = options.resource.animations;
+        this.sprites = {
+            [DragonSprite.FLYING]: new AnimatedSprite(animations.flying),
+            [DragonSprite.BEING_HIT]: new AnimatedSprite(animations.beingHit),
+            [DragonSprite.FIRING]: new AnimatedSprite(animations.firing),
+            [DragonSprite.DYING]: new AnimatedSprite(animations.dying),
+        };
+        for (const [_, sprite] of Object.entries(this.sprites)) {
+            // sprite.scale.set(0.5);
+            sprite.animationSpeed = 0.3;
+            sprite.loop = false;
+            // sprite.pivot.set(DRAGON_SIDE_X / 2, DRAGON_SIDE_Y / 2);
+            sprite.visible = false;
+            visual.addChild(sprite);
+        }
+
+        visual.scale.set(0.5);
+        visual.pivot.set(DRAGON_SIDE_X / 2, DRAGON_SIDE_Y / 2);
+        visual.visible = true;
+        this.visual = visual;
+        this.camera.addChild(visual);
+        this.currentSpriteName = DragonSprite.FLYING;
+        this.changeSprite(DragonSprite.FLYING);
+    }
+
+    private changeSprite(spriteName: DragonSprite): void {
+        const sprite = this.sprites[spriteName];
+        const currentSprite = this.sprites[this.currentSpriteName];
+
+        currentSprite.visible = false;
+        sprite.visible = true;
+        this.currentSpriteName = spriteName;
+    }
+
+    private getCurrentSprite(): AnimatedSprite {
+        return this.sprites[this.currentSpriteName];
     }
 
     moveUp(): void {
         console.log('Move up');
-        if (!this.flyingSprite.playing) {
+        if (!this.getCurrentSprite().playing) {
             const rotationVector = computeRotationVector(this.rigidBody.rotation());
             const rotationVectorDirected = rotateRightVector(rotationVector);
             console.log('Rotation vector', rotationVector);
             this.rigidBody.applyImpulse(multiplyVector(rotationVectorDirected, 120 * 1000), false);
-            this.flyingSprite.gotoAndPlay(0);
+            this.getCurrentSprite().gotoAndPlay(0);
         }
     }
 
     moveLeft(): void {
         console.log('Move left');
-        if (!this.flyingSprite.playing) {
+        if (!this.getCurrentSprite().playing) {
             const rotation = this.rigidBody.rotation();
             // const directionNumber = -1 * this.getDirectionNumber();
             this.rigidBody.applyTorqueImpulse(20 * 20 * 2000 * -1, false);
             // this.rigidBody.setRotation(rotation - 3.14 / 4, false);
-            this.flyingSprite.gotoAndPlay(0);
+            this.getCurrentSprite().gotoAndPlay(0);
         }
     }
 
     moveRight(): void {
         console.log('Move right');
-        if (!this.flyingSprite.playing) {
+        if (!this.getCurrentSprite().playing) {
             const rotation = this.rigidBody.rotation();
             // const directionNumber = 1 * this.getDirectionNumber();
             this.rigidBody.applyTorqueImpulse(20 * 20 * 2000, false);
             // this.rigidBody.setRotation(rotation + 3.14 / 4, false);
-            this.flyingSprite.gotoAndPlay(0);
+            this.getCurrentSprite().gotoAndPlay(0);
         }
     }
 
     turnBack(): void {
-        if (!this.flyingSprite.playing) {
-            this.flyingSprite.scale.x *= -1;
+        if (!this.getCurrentSprite().playing) {
+            this.visual.scale.x *= -1;
             const newDirection = (
                 this.direction === DragonDirection.LEFT ?
                 DragonDirection.RIGHT :
@@ -96,6 +143,21 @@ export class Dragon implements Physical, Movable {
             );
             this.direction = newDirection;
             console.log('Turn back', this.direction);
+        }
+    }
+
+    // #TODO: do it well. Do not use callbacks
+    fire(fireFinishedFunction: Function): void {
+        console.log('Fire');
+        if (!this.getCurrentSprite().playing) {
+            this.changeSprite(DragonSprite.FIRING);
+            this.getCurrentSprite().onComplete = () => {
+                this.getCurrentSprite().onComplete = null;
+                console.log('Firing complete', this.currentSpriteName);
+                fireFinishedFunction();
+                this.changeSprite(DragonSprite.FLYING);
+            };
+            this.getCurrentSprite().gotoAndPlay(0);
         }
     }
 
@@ -137,23 +199,24 @@ export class Dragon implements Physical, Movable {
         const position: Rapier.Vector = this.rigidBody.translation();
         const rotation: number = this.rigidBody.rotation();
 //        console.log('Position', position, 'Rotation', rotation, 'Sprite', this.flyingSprite.rotation);
-        this.flyingSprite.position = {x: position.x, y: position.y};
-        this.flyingSprite.rotation = rotation;
+        this.visual.position = {x: position.x, y: position.y};
+        this.visual.rotation = rotation;
     }
 
     start() {
-        this.flyingSprite.play();
+        this.getCurrentSprite().play();
     }
 
     stop() {
-        this.flyingSprite.stop();
+        this.getCurrentSprite().stop();
     }
 
     destroy() {
-        this.flyingSprite.destroy();
+        // TODO: destroy all sprites
+        this.getCurrentSprite().destroy();
     }
 
-    get() {
-        return this.flyingSprite;
+    get() : Container {
+        return this.visual;
     }
 }

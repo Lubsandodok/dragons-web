@@ -70,9 +70,12 @@ export class World implements WorldUpdatable {
 
     createFireball(playerId: string) {
         console.log('Create fireball for', playerId);
-        const fireball = this.entityManager.createFireball(playerId);
-        fireball.update();
-        fireball.fire();
+        const fireFinishedFunction = () => {
+            const fireball = this.entityManager.createFireball(playerId);
+            fireball.update();
+            fireball.fire();
+        };
+        this.entityManager.getDragon(playerId).fire(fireFinishedFunction);
     }
 
     setIsGamePlaying(isGamePlaying: boolean) {
