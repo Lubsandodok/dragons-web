@@ -38,21 +38,21 @@ export class Level implements Physical {
         this.background.addChild(rightBorder);
         this.background.addChild(downBorder);
 
-        console.log('Children: ', camera.children);
+        // console.log('Children: ', camera.children);
         camera.addChild(this.background);
 
         this.setUpPhysicsForBorder(leftBorder);
         this.setUpPhysicsForBorder(rightBorder);
         this.collider = this.setUpPhysicsForBorder(downBorder);
 
-        console.log('Back: ', this.collider);
+        // console.log('Back: ', this.collider);
 
-        console.log('Camera world width', this.background.width);
-        console.log('Camera world height', this.background.height);
+        // console.log('Camera world width', this.background.width);
+        // console.log('Camera world height', this.background.height);
     }
 
     private setUpPhysicsForBorder(border: Container) : Rapier.Collider {
-        console.log('Object', border);
+        // console.log('Object', border);
         const rigidBodyDesc = Rapier.RigidBodyDesc.fixed()
             .setRotation(border.rotation)
             .setTranslation(border.x, border.y);
@@ -60,7 +60,7 @@ export class Level implements Physical {
         const borderColliderDesc = Rapier.ColliderDesc.cuboid(border.width, border.height);
         borderColliderDesc.setActiveEvents(Rapier.ActiveEvents.COLLISION_EVENTS);
         const collider = this.physics.createCollider(borderColliderDesc, rigidBody);
-        console.log(collider.handle);
+        // console.log(collider.handle);
         return collider;
     }
 

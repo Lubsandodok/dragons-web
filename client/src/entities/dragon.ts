@@ -1,5 +1,5 @@
 import { AnimatedSprite, Spritesheet, Container, PI_2 } from 'pixi.js';
-import Rapier from '@dimforge/rapier2d-compat';
+import Rapier, { Vector2 } from '@dimforge/rapier2d-compat';
 import { Viewport } from 'pixi-viewport';
 
 import { Movable } from '../controls';
@@ -46,7 +46,7 @@ export class Dragon implements Physical, Movable {
         public physics: Rapier.World,
         options: DragonOptions,
     ) {
-        console.log('Options', options);
+        // console.log('Options', options);
         let rigidBodyDesc = Rapier.RigidBodyDesc.dynamic()
             .setTranslation(options.position.x, options.position.y)
             .setAngularDamping(0.5)
@@ -100,73 +100,111 @@ export class Dragon implements Physical, Movable {
         return this.sprites[this.currentSpriteName];
     }
 
-    moveUp(): void {
-        console.log('Move up');
-        if (!this.getCurrentSprite().playing) {
-            const rotationVector = computeRotationVector(this.rigidBody.rotation());
-            const rotationVectorDirected = rotateRightVector(rotationVector);
-            console.log('Rotation vector', rotationVector);
-            this.rigidBody.applyImpulse(multiplyVector(rotationVectorDirected, 120 * 1000), false);
-            this.getCurrentSprite().gotoAndPlay(0);
+    private canMove(): boolean {
+        if (this.lives === 0 || this.getCurrentSprite().playing) {
+            return false;
         }
+        return true;
+    }
+
+    moveUp(): void {
+        // console.log('Move up');
+        if (!this.canMove()) {
+            return;
+        }
+
+        const rotationVector = computeRotationVector(this.rigidBody.rotation());
+        const rotationVectorDirected = rotateRightVector(rotationVector);
+        // console.log('Rotation vector', rotationVector);
+        this.rigidBody.applyImpulse(multiplyVector(rotationVectorDirected, 120 * 1000), false);
+        this.getCurrentSprite().gotoAndPlay(0);
     }
 
     moveLeft(): void {
-        console.log('Move left');
-        if (!this.getCurrentSprite().playing) {
-            const rotation = this.rigidBody.rotation();
-            // const directionNumber = -1 * this.getDirectionNumber();
-            this.rigidBody.applyTorqueImpulse(20 * 20 * 2000 * -1, false);
-            // this.rigidBody.setRotation(rotation - 3.14 / 4, false);
-            this.getCurrentSprite().gotoAndPlay(0);
+        // console.log('Move left');
+        if (!this.canMove()) {
+            return;
         }
+
+        const rotation = this.rigidBody.rotation();
+        // const directionNumber = -1 * this.getDirectionNumber();
+        this.rigidBody.applyTorqueImpulse(20 * 20 * 2000 * -1, false);
+        // this.rigidBody.setRotation(rotation - 3.14 / 4, false);
+        this.getCurrentSprite().gotoAndPlay(0);
     }
 
     moveRight(): void {
-        console.log('Move right');
-        if (!this.getCurrentSprite().playing) {
-            const rotation = this.rigidBody.rotation();
-            // const directionNumber = 1 * this.getDirectionNumber();
-            this.rigidBody.applyTorqueImpulse(20 * 20 * 2000, false);
-            // this.rigidBody.setRotation(rotation + 3.14 / 4, false);
-            this.getCurrentSprite().gotoAndPlay(0);
+        // console.log('Move right');
+        if (!this.canMove()) {
+            return;
         }
+
+        const rotation = this.rigidBody.rotation();
+        // const directionNumber = 1 * this.getDirectionNumber();
+        this.rigidBody.applyTorqueImpulse(20 * 20 * 2000, false);
+        // this.rigidBody.setRotation(rotation + 3.14 / 4, false);
+        this.getCurrentSprite().gotoAndPlay(0);
     }
 
     turnBack(): void {
-        if (!this.getCurrentSprite().playing) {
-            this.visual.scale.x *= -1;
-            const newDirection = (
-                this.direction === DragonDirection.LEFT ?
-                DragonDirection.RIGHT :
-                DragonDirection.LEFT
-            );
-            this.direction = newDirection;
-            console.log('Turn back', this.direction);
+        if (!this.canMove()) {
+            return;
         }
+
+        this.visual.scale.x *= -1;
+        const newDirection = (
+            this.direction === DragonDirection.LEFT ?
+            DragonDirection.RIGHT :
+            DragonDirection.LEFT
+        );
+        this.direction = newDirection;
+        // console.log('Turn back', this.direction);
     }
 
     // #TODO: do it well. Do not use callbacks
     fire(fireFinishedFunction: Function): void {
-        console.log('Fire');
-        if (!this.getCurrentSprite().playing) {
-            this.changeSprite(DragonSprite.FIRING);
-            this.getCurrentSprite().onComplete = () => {
-                this.getCurrentSprite().onComplete = null;
-                console.log('Firing complete', this.currentSpriteName);
-                fireFinishedFunction();
-                this.changeSprite(DragonSprite.FLYING);
-            };
-            this.getCurrentSprite().gotoAndPlay(0);
+        if (!this.canMove()) {
+            return;
         }
+
+        // console.log('Fire');
+        this.changeSprite(DragonSprite.FIRING);
+        this.getCurrentSprite().onComplete = () => {
+            this.getCurrentSprite().onComplete = null;
+            // console.log('Firing complete', this.currentSpriteName);
+            fireFinishedFunction();
+            this.changeSprite(DragonSprite.FLYING);
+        };
+        this.getCurrentSprite().gotoAndPlay(0);
     }
 
     getLives() : number {
         return this.lives;
     }
 
-    lowerLives() {
+    isHit() {
+        if (this.getCurrentSprite().playing) {
+            this.getCurrentSprite().stop();
+        }
+        this.changeSprite(DragonSprite.BEING_HIT);
+        this.getCurrentSprite().onComplete = () => {
+            this.getCurrentSprite().onComplete = null;
+            this.changeSprite(DragonSprite.FLYING);
+        };
+        this.getCurrentSprite().gotoAndPlay(0);
         this.lives -= 1;
+    }
+
+    startDying() {
+        this.changeSprite(DragonSprite.DYING);
+        this.getCurrentSprite().gotoAndStop(7);
+        // this.rigidBody.applyImpulse(new Rapier.Vector2(0, 200 * 1000), false);
+        this.rigidBody.addForce(new Rapier.Vector2(0, 200 * 1000), false);
+        this.lives = 0;
+    }
+
+    finishDying() {
+        this.getCurrentSprite().gotoAndPlay(7);
     }
 
     getFireballOptions(): FireballOptions {

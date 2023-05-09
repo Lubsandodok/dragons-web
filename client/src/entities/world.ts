@@ -69,7 +69,7 @@ export class World implements WorldUpdatable {
     }
 
     createFireball(playerId: string) {
-        console.log('Create fireball for', playerId);
+        // console.log('Create fireball for', playerId);
         const fireFinishedFunction = () => {
             const fireball = this.entityManager.createFireball(playerId);
             fireball.update();
@@ -104,11 +104,15 @@ export class World implements WorldUpdatable {
         } else if (first instanceof Level && second instanceof Fireball) {
             this.entityManager.removeFireball(handleSecond);
         } else if (first instanceof Fireball && second instanceof Dragon) {
-            second.lowerLives();
+            this.entityManager.dragonIsHit(second);
             this.entityManager.removeFireball(handleFirst);
         } else if (first instanceof Dragon && second instanceof Fireball) {
-            first.lowerLives();
+            this.entityManager.dragonIsHit(first);
             this.entityManager.removeFireball(handleSecond);
+        } else if (first instanceof Dragon && second instanceof Level) {
+            this.entityManager.dragonIsHit(first, true);
+        } else if (first instanceof Level && second instanceof Dragon) {
+            this.entityManager.dragonIsHit(second, true);
         }
     }
 

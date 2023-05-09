@@ -45,7 +45,7 @@ export class Controls {
         if (!this.listenToKeyboard) {
             return;
         }
-        console.log('Pressed', event.code);
+        // console.log('Pressed', event.code);
         const messageToSend = {
             method: GameMethod.SEND_PLAYER_EVENT,
             parameters: {event: getPlayerEvent(event)},
@@ -64,19 +64,19 @@ export class Controls {
         this.ws.onmessage = (event: MessageEvent) => this.onMessage(event);
 
         this.ws.onopen = (event: Event) => {
-            console.log('Connected to server');
+            // console.log('Connected to server');
             const messageToSend = {method: GameMethod.JOIN_ROOM, parameters: {room_id: roomId}};
             this.ws.send(JSON.stringify(messageToSend));
         }
     }
 
     onMessage(event: MessageEvent) {
-        console.log('Got message from server:', event.data);
+        // console.log('Got message from server:', event.data);
         const data = JSON.parse(event.data);
 
         // TODO validation
         if (data.method === GameMethod.JOIN_ROOM) {
-            console.log('Joined room with id', data.result.your_player);
+            // console.log('Joined room with id', data.result.your_player);
             this.world.setMyPlayerId(data.result.your_player);
             // this.world.createCharacter(data.result.your_player, true);
         } else if (data.method === GameMethod.PLAYER_WAS_JOINED) {

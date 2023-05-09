@@ -14,7 +14,7 @@ export class EntityManager {
 
     constructor(public camera: Viewport, public physics: Rapier.World) {
         this.level = new Level(camera, physics);
-        console.log(this.level.getHandle());
+        // console.log(this.level.getHandle());
         this.handles[this.level.getHandle()] = this.level;
     }
 
@@ -55,6 +55,16 @@ export class EntityManager {
         this.handles[fireball.getHandle()] = fireball;
         this.fireballs[fireball.getHandle()] = fireball;
         return fireball;
+    }
+
+    dragonIsHit(dragon : Dragon, byGround : boolean = false) {
+        if (dragon.getLives() === 1) {
+            dragon.startDying();
+        } else if (dragon.getLives() === 0 && byGround) {
+            dragon.finishDying();
+        } else {
+            dragon.isHit();
+        }
     }
 
     removeFireball(handleId: number) {
