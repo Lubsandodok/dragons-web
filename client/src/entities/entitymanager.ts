@@ -1,21 +1,27 @@
 import { Viewport } from 'pixi-viewport';
+import { Sprite } from 'pixi.js';
 import Rapier from '@dimforge/rapier2d-compat';
 
-import { Physical } from '../canvas';
+import { Physical, WORLD_SIDE_X, WORLD_SIDE_Y, resources } from '../canvas';
 import { Dragon, DragonOptions } from './dragon';
 import { Fireball } from './fireball';
 import { Level } from './level';
+import { Ground, GroundOptions } from './ground';
 
 export class EntityManager {
     level: Level;
+    background: Sprite;
     handles: {[handle: number]: Physical} = {};
+    grounds: {[handle: number]: Ground} = {};
     dragons: {[playerId: string]: Dragon} = {};
     fireballs: {[handle: number]: Fireball} = {};
 
     constructor(public camera: Viewport, public physics: Rapier.World) {
-        this.level = new Level(camera, physics);
+        // TODO: work on a level
+        // this.level = new Level(camera, physics);
+        this.createLevel();
         // console.log(this.level.getHandle());
-        this.handles[this.level.getHandle()] = this.level;
+        // this.handles[this.level.getHandle()] = this.level;
     }
 
     createDragon(playerId : string, options : DragonOptions) : Dragon {
@@ -27,6 +33,46 @@ export class EntityManager {
         this.handles[dragon.getHandle()] = dragon;
         this.dragons[playerId] = dragon;
         return dragon;
+    }
+
+    private createGround(options: GroundOptions) {
+        const ground = new Ground(this.camera, this.physics, options);
+        this.handles[ground.getHandle()] = ground;
+        this.grounds[ground.getHandle()] = ground;
+    }
+
+    // TODO: create a separate class for level creation
+    createLevel() {
+        const backgroundSprite = new Sprite(resources.sky);
+        // TODO: use constants from separated file
+        backgroundSprite.scale = {x: 1, y: 1};
+        this.background = backgroundSprite;
+        this.camera.addChild(this.background);
+
+        this.createGround({
+            x: 0,
+            y: 0,
+            width: 100,
+            height: WORLD_SIDE_Y,
+        });
+        this.createGround({
+            x: WORLD_SIDE_X - 100,
+            y: 0,
+            width: 100,
+            height: WORLD_SIDE_Y,
+        });
+        this.createGround({
+            x: 0,
+            y: 0,
+            width: WORLD_SIDE_X,
+            height: 100,
+        });
+        this.createGround({
+            x: 0,
+            y: WORLD_SIDE_Y - 100,
+            width: WORLD_SIDE_X,
+            height: 100,
+        });
     }
 
     getEntityByHandle(handle: number) : Physical {

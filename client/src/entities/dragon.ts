@@ -23,7 +23,7 @@ export type DragonOptions = {
 enum DragonDirection {
     LEFT = 'LEFT',
     RIGHT = 'RIGHT',
-};
+}
 
 enum DragonSprite {
     FLYING = 'FLYING',

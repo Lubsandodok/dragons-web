@@ -7,7 +7,7 @@ import { Controls, WorldUpdatable } from '../controls';
 import { EntityManager } from './entitymanager';
 import { Dragon, DragonOptions } from './dragon';
 import { Fireball } from './fireball';
-import { Level } from './level';
+import { Ground } from './ground';
 
 export class World implements WorldUpdatable {
     isGamePlaying: boolean = false;
@@ -99,9 +99,9 @@ export class World implements WorldUpdatable {
         const first = this.entityManager.getEntityByHandle(handleFirst);
         const second = this.entityManager.getEntityByHandle(handleSecond);
         console.log('Collision', first, second);
-        if (first instanceof Fireball && second instanceof Level) {
+        if (first instanceof Fireball && second instanceof Ground) {
             this.entityManager.removeFireball(handleFirst);
-        } else if (first instanceof Level && second instanceof Fireball) {
+        } else if (first instanceof Ground && second instanceof Fireball) {
             this.entityManager.removeFireball(handleSecond);
         } else if (first instanceof Fireball && second instanceof Dragon) {
             this.entityManager.dragonIsHit(second);
@@ -109,9 +109,9 @@ export class World implements WorldUpdatable {
         } else if (first instanceof Dragon && second instanceof Fireball) {
             this.entityManager.dragonIsHit(first);
             this.entityManager.removeFireball(handleSecond);
-        } else if (first instanceof Dragon && second instanceof Level) {
+        } else if (first instanceof Dragon && second instanceof Ground) {
             this.entityManager.dragonIsHit(first, true);
-        } else if (first instanceof Level && second instanceof Dragon) {
+        } else if (first instanceof Ground && second instanceof Dragon) {
             this.entityManager.dragonIsHit(second, true);
         }
     }

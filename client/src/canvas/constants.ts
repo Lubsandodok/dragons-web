@@ -4,8 +4,8 @@ export const FIREBALL_SIDE_X = 120;
 export const FIREBALL_SIDE_Y = 100;
 export const SKY_SIDE_X = 1920;
 export const SKY_SIDE_Y = 1080;
-export const WORLD_SIDE_X = SKY_SIDE_X * 3;
-export const WORLD_SIDE_Y = SKY_SIDE_Y * 6;
+export const WORLD_SIDE_X = SKY_SIDE_X * 1;
+export const WORLD_SIDE_Y = SKY_SIDE_Y * 1;
 export const GROUND_WIDTH = 50;
 export const LIVES_AT_START = 3;
 
