@@ -12,7 +12,7 @@ CXX = g++
 CXXFLAGS = -O3 -Wpedantic -Wall -Wextra -Wsign-conversion -Wconversion \
 		   -flto -std=c++2a -IuWebSockets/src -IuWebSockets/uSockets/src
 LDFLAGS = -lz uWebSockets/uSockets/*.o
-SOURCES = src/main.cpp src/room.cpp src/room_manager.cpp src/command.cpp src/utils.cpp
+SOURCES = src/main.cpp src/room.cpp src/room_manager.cpp src/command.cpp src/utils.cpp src/db.cpp
 
 build:
 	@if ! [ -f uWebSockets/uSockets/uSockets.a ]; then\
