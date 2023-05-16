@@ -11,11 +11,16 @@ public:
 
 class CreatePlayerCommand final : public Command {
 public:
-    CreatePlayerCommand(WebSocket* ws_arg, const PlayerId& player_id_arg);
+    CreatePlayerCommand(
+        WebSocket* ws_arg,
+        const PlayerId& player_id_arg,
+        const PlayerStartingPosition& player_starting_position_arg
+    );
     void apply(RoomState& state) const;
 private:
     WebSocket* ws;
     PlayerId player_id;
+    PlayerStartingPosition player_starting_position;
 };
 
 class SendToOneCommand final : public Command {

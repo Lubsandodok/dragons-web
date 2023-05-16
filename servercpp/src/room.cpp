@@ -29,6 +29,14 @@ bool Room::should_game_start() const {
     return current_state.players.size() == expected_player_count;
 }
 
+std::unordered_set<PlayerStartingPosition> Room::get_current_starting_positions() const {
+    std::unordered_set<PlayerStartingPosition> positions;
+    for (const auto& id_player : current_state.players) {
+        positions.insert(id_player.second.starting_position);
+    }
+    return positions;
+}
+
 std::string Room::format_join_room_response(const PlayerId& player_id) const {
     // TODO result -> parameters
     std::cout << "format_join_room_response-start" << std::endl;
@@ -50,7 +58,11 @@ std::string Room::format_player_was_joined_response() const {
         }},
     };
     for (const auto& id_player : current_state.players) {
-        response["parameters"]["players"].push_back(id_player.first);
+        json player = {
+            {"id", id_player.first},
+            {"starting_position", static_cast<uint8_t>(id_player.second.starting_position)},
+        };
+        response["parameters"]["players"].push_back(player);
     }
     std::cout << "format_player_was_joined_response-end" << std::endl;
     return response.dump();

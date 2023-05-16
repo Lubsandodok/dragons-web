@@ -37,9 +37,12 @@ void RoomManager::on_message(WebSocket* ws, std::string_view message) {
         if (room_it != rooms.end()) {
             std::shared_ptr<Room> room = room_it->second;
             PlayerId player_id = utils::generate_uuid4();
+            PlayerStartingPosition player_starting_position = utils::generate_new_starting_position(
+                room->get_current_starting_positions()
+            );
 
             std::shared_ptr<CreatePlayerCommand> create_command =
-                std::make_shared<CreatePlayerCommand>(ws, player_id);
+                std::make_shared<CreatePlayerCommand>(ws, player_id, player_starting_position);
             room->applyCommand(create_command);
 
             ws->getUserData()->room_id = room_id;

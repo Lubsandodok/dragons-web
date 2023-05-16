@@ -18,6 +18,13 @@ export enum PlayerEvent {
     CREATE_FIREBALL = 'CREATE_FIREBALL',
 };
 
+export enum PlayerStartingPosition {
+    LEFT_HIGH = 0,
+    RIGHT_HIGH = 1,
+    LEFT_LOW = 2,
+    RIGHT_LOW = 3,
+};
+
 export enum GameMethod {
     PLAYER_EVENT_WAS_SENT = 'PLAYER_EVENT_WAS_SENT',
     JOIN_ROOM = 'JOIN_ROOM',

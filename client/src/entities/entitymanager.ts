@@ -83,10 +83,6 @@ export class EntityManager {
         return this.dragons[playerId];
     }
 
-    getDragonsLength() : number {
-        return Object.keys(this.dragons).length;
-    }
-
     removeDragon(playerId : string) {
         const dragon = this.dragons[playerId];
         delete this.handles[dragon.getHandle()];

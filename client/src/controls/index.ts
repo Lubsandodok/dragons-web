@@ -1,4 +1,4 @@
-import { PlayerEvent, GameMethod } from '../canvas';
+import { PlayerEvent, GameMethod, PlayerStartingPosition } from '../canvas';
 
 export interface Movable {
     moveUp(): void;
@@ -7,7 +7,7 @@ export interface Movable {
 }
 
 export interface WorldUpdatable {
-    createCharacter(playerId: string): void;
+    createCharacter(playerId: string, startingPosition: PlayerStartingPosition): void;
     createFireball(playerId: string): void;
     moveCharacter(playerId: string, event: string): void;
     setIsGamePlaying(isGamePlaying: boolean): void;
@@ -71,7 +71,7 @@ export class Controls {
     }
 
     onMessage(event: MessageEvent) {
-        // console.log('Got message from server:', event.data);
+        console.log('Got message from server:', event.data);
         const data = JSON.parse(event.data);
 
         // TODO validation
@@ -82,8 +82,11 @@ export class Controls {
         } else if (data.method === GameMethod.PLAYER_WAS_JOINED) {
             const players = data.parameters.players;
             if (data.parameters.is_game_playing) {
-                for (const playerId of players) {
-                    this.world.createCharacter(playerId);
+                for (const player of players) {
+                    this.world.createCharacter(
+                        player.id,
+                        player.starting_position,
+                    );
                 }
                 this.world.setIsGamePlaying(true);
             }

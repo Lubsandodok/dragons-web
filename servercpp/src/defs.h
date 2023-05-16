@@ -25,6 +25,13 @@ enum class PlayerEvent : uint8_t {
     CREATE_FIREBALL,
 };
 
+enum class PlayerStartingPosition : uint8_t {
+    LEFT_HIGH,
+    RIGHT_HIGH,
+    LEFT_LOW,
+    RIGHT_LOW,
+};
+
 enum class GameMethod : uint8_t {
     NONE,
     PLAYER_EVENT_WAS_SENT,
@@ -37,6 +44,7 @@ enum class GameMethod : uint8_t {
 struct Player {
     std::string id;
     WebSocket* ws;
+    PlayerStartingPosition starting_position;
     PlayerEvent event = PlayerEvent::NONE;
 };
 

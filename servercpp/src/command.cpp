@@ -1,10 +1,14 @@
 #include "command.h"
 
-CreatePlayerCommand::CreatePlayerCommand(WebSocket* ws_arg, const PlayerId& player_id_arg)
-    : ws(ws_arg), player_id(player_id_arg) {}
+CreatePlayerCommand::CreatePlayerCommand(
+    WebSocket* ws_arg,
+    const PlayerId& player_id_arg,
+    const PlayerStartingPosition& player_starting_position_arg
+)
+    : ws(ws_arg), player_id(player_id_arg), player_starting_position(player_starting_position_arg) {}
 
 void CreatePlayerCommand::apply(RoomState& state) const {
-    state.players[player_id] = {player_id, ws, PlayerEvent::NONE};
+    state.players[player_id] = {player_id, ws, player_starting_position, PlayerEvent::NONE};
 }
 
 SendToOneCommand::SendToOneCommand(const PlayerId& player_id_arg, const std::string& data_arg)

@@ -13,6 +13,23 @@ namespace utils {
         return ss.str();
     }
 
+    PlayerStartingPosition generate_new_starting_position(
+        const std::unordered_set<PlayerStartingPosition>& current_positions
+    ) {
+        std::random_device rd;
+        std::mt19937 generator(rd());
+        std::uniform_int_distribution<uint8_t> distribution(0, 3);
+        uint8_t new_position = distribution(generator);
+        while (current_positions.find(static_cast<PlayerStartingPosition>(new_position)) != current_positions.end()) {
+            new_position++;
+            // TODO: use constant instead of hardcoded value
+            if (new_position > 3) {
+                new_position = 0;
+            }
+        }
+        return static_cast<PlayerStartingPosition>(new_position);
+    }
+
     GameMethod string_to_game_method(const std::string& method_key) {
         static std::unordered_map<std::string, GameMethod> str_to_enum = {
             {"PLAYER_EVENT_WAS_SENT", GameMethod::PLAYER_EVENT_WAS_SENT},

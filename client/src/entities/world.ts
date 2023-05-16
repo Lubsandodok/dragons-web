@@ -2,7 +2,7 @@ import { Graphics, Spritesheet } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 import Rapier from '@dimforge/rapier2d-compat';
 
-import { resources, WORLD_SIDE_X, WORLD_SIDE_Y, PlayerEvent, PanelState, Physical } from '../canvas';
+import { resources, WORLD_SIDE_X, WORLD_SIDE_Y, PlayerEvent, PanelState, Physical, PlayerStartingPosition } from '../canvas';
 import { Controls, WorldUpdatable } from '../controls';
 import { EntityManager } from './entitymanager';
 import { Dragon, DragonOptions } from './dragon';
@@ -39,8 +39,11 @@ export class World implements WorldUpdatable {
         });
     }
 
-    createCharacter(playerId: string): void {
-        const dragon = this.entityManager.createDragon(playerId, this.getDragonOptions());
+    createCharacter(playerId: string, startingPosition: PlayerStartingPosition): void {
+        const dragon = this.entityManager.createDragon(
+            playerId,
+            this.getDragonOptions(startingPosition),
+        );
         if (dragon === null) {
             return;
         }
@@ -153,23 +156,22 @@ export class World implements WorldUpdatable {
         }
     }
 
-    private getDragonOptions() : DragonOptions {
-        function generateOptions(resource: Spritesheet, x_shift: number) : DragonOptions {
+    private getDragonOptions(startingPosition: PlayerStartingPosition) : DragonOptions {
+        function generateOptions(resource: Spritesheet, x_shift: number, y_shift: number) : DragonOptions {
             return {
                 resource: resource,
-                position: new Rapier.Vector2(WORLD_SIDE_X / 2 + x_shift, WORLD_SIDE_Y / 2),
+                position: new Rapier.Vector2(WORLD_SIDE_X / 2 + x_shift, WORLD_SIDE_Y / 2 + y_shift),
             };
         }
 
-        const length = this.entityManager.getDragonsLength();
-        if (length === 0) {
-            return generateOptions(resources.dragonGreen, -200);
-        } else if (length === 1) {
-            return generateOptions(resources.dragonBlue, -100);
-        } else if (length === 2) {
-            return generateOptions(resources.dragonRed, 100);
-        } else if (length === 3) {
-            return generateOptions(resources.dragonBlack, 200);
+        if (startingPosition === PlayerStartingPosition.LEFT_HIGH) {
+            return generateOptions(resources.dragonGreen, -200, -200);
+        } else if (startingPosition === PlayerStartingPosition.LEFT_LOW) {
+            return generateOptions(resources.dragonBlue, -200, 200);
+        } else if (startingPosition === PlayerStartingPosition.RIGHT_HIGH) {
+            return generateOptions(resources.dragonRed, 200, -200);
+        } else if (startingPosition === PlayerStartingPosition.RIGHT_LOW) {
+            return generateOptions(resources.dragonBlack, 200, 200);
         }
     }
 
