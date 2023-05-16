@@ -22,7 +22,7 @@ const std::string& Room::get_id() const {
 }
 
 bool Room::get_is_game_playing() const {
-    return current_state.is_game_plaing;
+    return current_state.is_game_playing;
 }
 
 bool Room::should_game_start() const {
@@ -53,7 +53,7 @@ std::string Room::format_player_was_joined_response() const {
     json response = {
         {"method", "PLAYER_WAS_JOINED"},
         {"parameters", {
-            {"is_game_playing", current_state.is_game_plaing},
+            {"is_game_playing", current_state.is_game_playing},
             {"players", json::array()},
         }},
     };

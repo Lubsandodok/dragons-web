@@ -44,12 +44,14 @@ enum class GameMethod : uint8_t {
 struct Player {
     std::string id;
     WebSocket* ws;
-    PlayerStartingPosition starting_position;
+    PlayerStartingPosition starting_position; // TODO: it is better to initialize this
     PlayerEvent event = PlayerEvent::NONE;
 };
 
 struct RoomState {
-    bool is_game_plaing = false;
+    bool is_game_playing = false;
+    bool is_game_finished = false;
+    PlayerId winner_id;
     std::unordered_map<PlayerId, Player> players;
 };
 

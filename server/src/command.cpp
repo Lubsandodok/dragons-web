@@ -36,7 +36,7 @@ ChangeIsGamePlayingCommand::ChangeIsGamePlayingCommand(bool is_game_playing_arg)
     : is_game_playing(is_game_playing_arg) {}
 
 void ChangeIsGamePlayingCommand::apply(RoomState& state) const {
-    state.is_game_plaing = is_game_playing;
+    state.is_game_playing = is_game_playing;
 }
 
 SetPlayerEventCommand::SetPlayerEventCommand(const PlayerId& player_id_arg, PlayerEvent event_arg)
@@ -65,4 +65,13 @@ void ClearPlayerEventsCommand::apply(RoomState& state) const {
     for (auto& player : state.players) {
         player.second.event = PlayerEvent::NONE;
     }
+}
+
+FinishRoomCommand::FinishRoomCommand(const PlayerId& winner_id_arg)
+    : winner_id(winner_id_arg) {}
+
+void FinishRoomCommand::apply(RoomState& state) const {
+    state.winner_id = winner_id;
+    state.is_game_playing = false;
+    state.is_game_finished = true;
 }

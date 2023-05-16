@@ -83,6 +83,10 @@ export class EntityManager {
         return this.dragons[playerId];
     }
 
+    getAlivePlayerIds() : string[] {
+        return Object.keys(this.dragons).filter(playerId => this.dragons[playerId].getLives() > 0);
+    }
+
     removeDragon(playerId : string) {
         const dragon = this.dragons[playerId];
         delete this.handles[dragon.getHandle()];

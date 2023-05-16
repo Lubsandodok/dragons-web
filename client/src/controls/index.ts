@@ -70,6 +70,16 @@ export class Controls {
         }
     }
 
+    finishGame(winnerId: string) {
+        // TODO: unsubscribe from world and stop listening to keyboard
+        this.listenToKeyboard = false;
+        const messageToSend = {
+            method: GameMethod.FINISH_ROOM,
+            parameters: {winner_id: winnerId},
+        };
+        this.ws.send(JSON.stringify(messageToSend));
+    }
+
     onMessage(event: MessageEvent) {
         console.log('Got message from server:', event.data);
         const data = JSON.parse(event.data);

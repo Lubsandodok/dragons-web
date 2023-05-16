@@ -70,4 +70,12 @@ public:
     void apply(RoomState& state) const;
 };
 
+class FinishRoomCommand final : public Command {
+public:
+    FinishRoomCommand(const PlayerId& winner_id_arg);
+    void apply(RoomState& state) const;
+private:
+    PlayerId winner_id;
+};
+
 #endif // COMMAND_H

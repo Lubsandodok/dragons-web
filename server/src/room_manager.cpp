@@ -80,6 +80,20 @@ void RoomManager::on_message(WebSocket* ws, std::string_view message) {
             );
             room->applyCommand(set_player_event_command);
         }
+    } else if (method == GameMethod::FINISH_ROOM) {
+        std::cout << "On finish room" << std::endl;
+        // TODO: check winner_id. We can use info from multiple clients
+        const std::string& room_id = ws->getUserData()->room_id;
+        const PlayerId& player_id = ws->getUserData()->player_id;
+        auto room_it = rooms.find(room_id);
+        if (room_it != rooms.end()) {
+            std::shared_ptr<Room> room = room_it->second;
+            const std::string& winner_id = parameters["winner_id"];
+            auto finish_room_command = std::make_shared<FinishRoomCommand>(
+                winner_id
+            );
+            room->applyCommand(finish_room_command);
+        }
     }
 }
 

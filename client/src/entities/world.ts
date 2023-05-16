@@ -137,7 +137,18 @@ export class World implements WorldUpdatable {
 
         this.entityManager.update();
 
+        this.handleGameOver();
+
         this.drawDebugGraphics();
+    }
+
+    private handleGameOver() {
+        const alivePlayers = this.entityManager.getAlivePlayerIds();
+        if (alivePlayers.length === 1) {
+            // TODO: This should be handled by the server
+            this.isGamePlaying = false;
+            this.controls.finishGame(alivePlayers[0]);
+        }
     }
 
     private drawDebugGraphics() {
