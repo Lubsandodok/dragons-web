@@ -1,6 +1,7 @@
 import React from 'react';
 import { Canvas, loadResources, loadPhysicsEngine, LIVES_AT_START, PanelState } from '../canvas';
 import { Controls } from '../controls';
+import { RoomsProps } from './Rooms';
 import Ui from './Ui';
 
 class App extends React.Component {
@@ -8,13 +9,29 @@ class App extends React.Component {
     controls: Controls;
     canvasRef: React.RefObject<HTMLCanvasElement>;
 
-    state: {isRoomsVisible: boolean, link: string, panelState: PanelState};
+    state: {
+        isRoomsVisible: boolean,
+        roomProps: RoomsProps,
+        panelState: PanelState,
+    };
 
     constructor(props: any) {
         super(props);
         this.canvasRef = React.createRef<HTMLCanvasElement>();
 
-        this.state = {isRoomsVisible: true, link: null, panelState: {playerLives: LIVES_AT_START}};
+        this.state = {
+            isRoomsVisible: true,
+            roomProps: {
+                createRoom: this.createRoom,
+                joinRoom: this.joinRoom,
+                roomId: null,
+                isCreateRoomVisible: true,
+                isJoinRoomVisible: false,
+                isPlayerCountVisible: true,
+                isNicknameVisible: false,
+            },
+            panelState: {playerLives: LIVES_AT_START, winnerName: null},
+        };
     }
 
     async componentDidMount(): Promise<void> {
@@ -39,8 +56,18 @@ class App extends React.Component {
         if (splited.length === 3) {
             const roomId = splited[2];
             console.log('roomId we got', roomId);
-            this.controls.joinRoom(roomId);
-            this.setState({isRoomsVisible: false});
+            this.setState({
+                roomProps: {
+                    ...this.state.roomProps,
+                    roomId: roomId,
+                    isCreateRoomVisible: false,
+                    isJoinRoomVisible: true,
+                    isPlayerCountVisible: false,
+                    isNicknameVisible: true,
+                },
+            });
+            // this.controls.joinRoom(roomId);
+            // this.setState({isRoomsVisible: false});
         }
 
     //  debug
@@ -61,17 +88,25 @@ class App extends React.Component {
         .then((response) => response.json())
         .then((data) => {
             console.log('Success:', data);
-            const fullLink = `http://localhost:1234/room/${data.room_id}`;
-            this.setState({link: fullLink});
-
-            setTimeout(() => {
-                this.setState({isRoomsVisible: false});
-                this.controls.joinRoom(data.room_id);
-            }, 5000);
+            this.setState(
+                {roomProps: {
+                    ...this.state.roomProps,
+                    roomId: data.room_id,
+                    isCreateRoomVisible: false,
+                    isJoinRoomVisible: true,
+                    isPlayerCountVisible: false,
+                    isNicknameVisible: true,
+                },
+            });
         })
         .catch((error) => {
             console.log('Error:', error);
         });
+    };
+
+    joinRoom = (roomId: string, nickname: string) => {
+        this.setState({isRoomsVisible: false});
+        this.controls.joinRoom(roomId, nickname);
     };
 
     render() {
@@ -82,8 +117,7 @@ class App extends React.Component {
                 />
                 <Ui
                     isRoomsVisible={this.state.isRoomsVisible}
-                    createRoom={this.createRoom}
-                    link={this.state.link}
+                    roomProps={this.state.roomProps}
                     panelState={this.state.panelState}
                 />
             </div>

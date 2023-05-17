@@ -35,4 +35,5 @@ export enum GameMethod {
 
 export type PanelState = {
     playerLives: number,
+    winnerName: string,
 };

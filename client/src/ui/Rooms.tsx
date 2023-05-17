@@ -14,12 +14,17 @@ const DivCss: CSS.Properties = {
     backgroundColor: 'lightblue',
 };
 
-type RoomsProps = {
+export type RoomsProps = {
     createRoom: (nickname: string, playerCount: number) => void,
-    link: string | null,
+    joinRoom: (roomId: string, nickname: string) => void,
+    roomId: string | null,
+    isCreateRoomVisible: boolean,
+    isJoinRoomVisible: boolean,
+    isPlayerCountVisible: boolean,
+    isNicknameVisible: boolean,
 };
 
-export default class Rooms extends React.Component<RoomsProps> {
+export class Rooms extends React.Component<RoomsProps> {
     state: {nickname: string, playerCount: number};
 
     constructor(props: RoomsProps) {
@@ -41,31 +46,49 @@ export default class Rooms extends React.Component<RoomsProps> {
         this.props.createRoom(this.state.nickname, this.state.playerCount);
     };
 
+    handleJoinRoomButton = () => {
+        console.log(this.state.nickname);
+        this.props.joinRoom(this.props.roomId, this.state.nickname);
+    };
+
     render() {
         return (
             <div style={DivCss}>
-                <label>
-                    Enter Nickname
-                    <input
-                        type='text'
-                        placeholder='Nickname'
-                        value={this.state.nickname}
-                        onChange={this.handleNickname}
-                    />
-                </label>
-                <label>
-                    Enter Player's count
-                    <input
-                        type='number'
-                        placeholder="Player's count"
-                        value={this.state.playerCount}
-                        onChange={this.handlePlayerCount}
-                    />
-                </label>
-                <button onClick={this.handleCreateRoomButton}>
-                    Create room
-                </button>
-                {this.props.link && <label>{this.props.link}</label>}
+                {this.props.isNicknameVisible &&
+                    <label>
+                        Enter Nickname
+                        <input
+                            type='text'
+                            placeholder='Nickname'
+                            value={this.state.nickname}
+                            onChange={this.handleNickname}
+                        />
+                    </label>
+                }
+                {this.props.isPlayerCountVisible &&
+                    <label>
+                        Enter Player's count
+                        <input
+                            type='number'
+                            placeholder="Player's count"
+                            value={this.state.playerCount}
+                            onChange={this.handlePlayerCount}
+                        />
+                    </label>
+                }
+                {this.props.isCreateRoomVisible &&
+                    <button onClick={this.handleCreateRoomButton}>
+                        Create room
+                    </button>
+                }
+                {this.props.isJoinRoomVisible &&
+                    <button onClick={this.handleJoinRoomButton}>
+                        Join room
+                    </button>
+                }
+                {this.props.roomId &&
+                    <label>{`http://localhost:1234/room/${this.props.roomId}`}</label>
+                }
             </div>
         );
     }

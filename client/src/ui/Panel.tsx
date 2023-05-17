@@ -16,6 +16,7 @@ const DivCss: CSS.Properties = {
 
 type PanelProps = {
     playerLives: number,
+    winnerName: string | null,
 };
 
 export default class Panel extends React.Component<PanelProps> {
@@ -28,9 +29,17 @@ export default class Panel extends React.Component<PanelProps> {
             {length: this.props.playerLives}, (_, i) => <img src={heartImage} />
         );
         return (
-            <div style={DivCss}>
-                {lives}
+            <div>
+                <div style={DivCss}>
+                    {lives}
+                </div>
+
+                {this.props.winnerName &&
+                    <label>
+                        {this.props.winnerName} won!
+                    </label>
+                }
             </div>
-        )
+        );
     }
 }

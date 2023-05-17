@@ -12,8 +12,10 @@ import { Ground } from './ground';
 export class World implements WorldUpdatable {
     isGamePlaying: boolean = false;
     myPlayerId: string;
+    winnerId?: string;
 
     entityManager: EntityManager;
+    nicknames: {[playerId: string]: string} = {};
 
     physicsWorld: Rapier.World;
     eventQueue: Rapier.EventQueue;
@@ -39,7 +41,11 @@ export class World implements WorldUpdatable {
         });
     }
 
-    createCharacter(playerId: string, startingPosition: PlayerStartingPosition): void {
+    createCharacter(
+        playerId: string,
+        startingPosition: PlayerStartingPosition,
+        nickname: string,
+    ): void {
         const dragon = this.entityManager.createDragon(
             playerId,
             this.getDragonOptions(startingPosition),
@@ -48,6 +54,8 @@ export class World implements WorldUpdatable {
             return;
         }
         dragon.update();
+
+        this.nicknames[playerId] = nickname;
 
         if (this.myPlayerId === playerId) {
             this.camera.follow(dragon.get(), {
@@ -95,7 +103,9 @@ export class World implements WorldUpdatable {
         }
 
         const playerDragon = this.entityManager.getDragon(this.myPlayerId);
-        return {playerLives: playerDragon.getLives()};
+        const winnerName = this.winnerId ? this.nicknames[this.winnerId] : null;
+        console.log('Winner name: ', winnerName);
+        return {playerLives: playerDragon.getLives(), winnerName: winnerName};
     }
 
     handleCollisionEvent(handleFirst: number, handleSecond: number) {
@@ -147,6 +157,8 @@ export class World implements WorldUpdatable {
         if (alivePlayers.length === 1) {
             // TODO: This should be handled by the server
             this.isGamePlaying = false;
+            this.winnerId = alivePlayers[0];
+            console.log('Game over', alivePlayers[0]);
             this.controls.finishGame(alivePlayers[0]);
         }
     }

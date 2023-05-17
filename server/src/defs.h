@@ -43,6 +43,7 @@ enum class GameMethod : uint8_t {
 
 struct Player {
     std::string id;
+    std::string nickname;
     WebSocket* ws;
     PlayerStartingPosition starting_position; // TODO: it is better to initialize this
     PlayerEvent event = PlayerEvent::NONE;

@@ -33,6 +33,7 @@ void RoomManager::on_message(WebSocket* ws, std::string_view message) {
         std::cout << "On join room: " << msg << parameters.is_object() << std::endl;
         // TODO validation
         const std::string& room_id = parameters["room_id"].get<std::string>();
+        const std::string& nickname = parameters["nickname"].get<std::string>();
         auto room_it = rooms.find(room_id);
         if (room_it != rooms.end()) {
             std::shared_ptr<Room> room = room_it->second;
@@ -42,7 +43,7 @@ void RoomManager::on_message(WebSocket* ws, std::string_view message) {
             );
 
             std::shared_ptr<CreatePlayerCommand> create_command =
-                std::make_shared<CreatePlayerCommand>(ws, player_id, player_starting_position);
+                std::make_shared<CreatePlayerCommand>(ws, player_id, nickname, player_starting_position);
             room->applyCommand(create_command);
 
             ws->getUserData()->room_id = room_id;
@@ -84,7 +85,7 @@ void RoomManager::on_message(WebSocket* ws, std::string_view message) {
         std::cout << "On finish room" << std::endl;
         // TODO: check winner_id. We can use info from multiple clients
         const std::string& room_id = ws->getUserData()->room_id;
-        const PlayerId& player_id = ws->getUserData()->player_id;
+        // const PlayerId& player_id = ws->getUserData()->player_id;
         auto room_it = rooms.find(room_id);
         if (room_it != rooms.end()) {
             std::shared_ptr<Room> room = room_it->second;

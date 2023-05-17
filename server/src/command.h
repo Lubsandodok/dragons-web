@@ -14,12 +14,14 @@ public:
     CreatePlayerCommand(
         WebSocket* ws_arg,
         const PlayerId& player_id_arg,
+        const std::string& nickname_arg,
         const PlayerStartingPosition& player_starting_position_arg
     );
     void apply(RoomState& state) const;
 private:
     WebSocket* ws;
     PlayerId player_id;
+    std::string nickname;
     PlayerStartingPosition player_starting_position;
 };
 

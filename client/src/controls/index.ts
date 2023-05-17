@@ -7,7 +7,11 @@ export interface Movable {
 }
 
 export interface WorldUpdatable {
-    createCharacter(playerId: string, startingPosition: PlayerStartingPosition): void;
+    createCharacter(
+        playerId: string,
+        startingPosition: PlayerStartingPosition,
+        nickname: string,
+    ): void;
     createFireball(playerId: string): void;
     moveCharacter(playerId: string, event: string): void;
     setIsGamePlaying(isGamePlaying: boolean): void;
@@ -57,7 +61,7 @@ export class Controls {
         this.world = world;
     }
 
-    joinRoom(roomId: string) {
+    joinRoom(roomId: string, nickname: string) {
         this.listenToKeyboard = true;
 
         this.ws = new WebSocket('ws://localhost:9001/room/join');
@@ -65,7 +69,10 @@ export class Controls {
 
         this.ws.onopen = (event: Event) => {
             // console.log('Connected to server');
-            const messageToSend = {method: GameMethod.JOIN_ROOM, parameters: {room_id: roomId}};
+            const messageToSend = {
+                method: GameMethod.JOIN_ROOM,
+                parameters: {room_id: roomId, nickname: nickname},
+            };
             this.ws.send(JSON.stringify(messageToSend));
         }
     }
@@ -96,6 +103,7 @@ export class Controls {
                     this.world.createCharacter(
                         player.id,
                         player.starting_position,
+                        player.nickname,
                     );
                 }
                 this.world.setIsGamePlaying(true);

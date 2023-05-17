@@ -60,6 +60,7 @@ std::string Room::format_player_was_joined_response() const {
     for (const auto& id_player : current_state.players) {
         json player = {
             {"id", id_player.first},
+            {"nickname", id_player.second.nickname},
             {"starting_position", static_cast<uint8_t>(id_player.second.starting_position)},
         };
         response["parameters"]["players"].push_back(player);

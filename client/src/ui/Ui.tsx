@@ -1,14 +1,13 @@
 import React from 'react';
 
-import Rooms from './Rooms';
+import { Rooms, RoomsProps } from './Rooms';
 import Panel from './Panel';
 import { PanelState } from '../canvas';
 
 type UiProps = {
     isRoomsVisible: boolean,
-    link: string,
+    roomProps: RoomsProps,
     panelState: PanelState,
-    createRoom: (nickname: string, playerCount: number) => void,
 };
 
 class Ui extends React.Component<UiProps> {
@@ -20,13 +19,10 @@ class Ui extends React.Component<UiProps> {
         return (
             <div>
                 {this.props.isRoomsVisible &&
-                    <Rooms
-                        createRoom={this.props.createRoom}
-                        link={this.props.link}
-                    />
+                    <Rooms {...this.props.roomProps}/>
                 }
                 {!this.props.isRoomsVisible &&
-                    <Panel playerLives={this.props.panelState.playerLives} />
+                    <Panel {...this.props.panelState}/>
                 }
             </div>
         );
