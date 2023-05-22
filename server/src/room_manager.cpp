@@ -1,21 +1,29 @@
 #include "room_manager.h"
 
 #include <memory>
-//#include <include/json.hpp>
-#include "../include/json.hpp"
+
+#include "json.hpp"
+#include "plog/Log.h"
+// #include "../include/json.hpp"
+
 #include "utils.h"
 
 using namespace nlohmann;
 
-std::string RoomManager::create_room(std::string_view body) {
-    std::cout << "On create room" << std::endl;
+RoomManager& RoomManager::get_instance() {
+    static RoomManager instance;
+    return instance;
+}
 
+std::string RoomManager::create_room(std::string_view body) {
     const json msg = json::parse(body);
     uint8_t expected_player_count = msg["expected_player_count"].get<uint8_t>();
 
     auto room = std::make_shared<Room>(expected_player_count);
     rooms[room->get_id()] = room;
     json response = {{"room_id", room->get_id()}};
+
+    PLOG(plog::info) << "Room created: " << expected_player_count << " " << room->get_id();
     return response.dump();
 }
 
@@ -23,14 +31,14 @@ void RoomManager::on_message(WebSocket* ws, std::string_view message) {
     const json msg = json::parse(message);
     
     if (!(msg.contains("method") && msg.contains("parameters"))) {
-        std::cout << "Error. Message doesnt have parameters" << std::endl;
+        PLOG(plog::error) << "Error. Message doesnt have parameters: " << message;
         return;
     }
 
     GameMethod method = utils::string_to_game_method(msg["method"]);
     const json& parameters = msg["parameters"];
     if (method == GameMethod::JOIN_ROOM) {
-        std::cout << "On join room: " << msg << parameters.is_object() << std::endl;
+        PLOG(plog::info) << "On join room: " << message;
         // TODO validation
         const std::string& room_id = parameters["room_id"].get<std::string>();
         const std::string& nickname = parameters["nickname"].get<std::string>();
@@ -65,10 +73,11 @@ void RoomManager::on_message(WebSocket* ws, std::string_view message) {
                 room->format_player_was_joined_response()
             );
             room->applyCommand(send_to_all_command);
+            PLOG(plog::info) << "Player joined: room_id " << room_id <<
+                " player_id " << player_id << " nickname " << nickname;
         }
     } else if (method == GameMethod::SEND_PLAYER_EVENT) {
         // TODO validation
-        std::cout << "On player event" << std::endl;
         const std::string& room_id = ws->getUserData()->room_id;
         const PlayerId& player_id = ws->getUserData()->player_id;
         auto room_it = rooms.find(room_id);
@@ -82,10 +91,10 @@ void RoomManager::on_message(WebSocket* ws, std::string_view message) {
             room->applyCommand(set_player_event_command);
         }
     } else if (method == GameMethod::FINISH_ROOM) {
-        std::cout << "On finish room" << std::endl;
+        PLOG(plog::info) << "On finish room: " << message;
         // TODO: check winner_id. We can use info from multiple clients
         const std::string& room_id = ws->getUserData()->room_id;
-        // const PlayerId& player_id = ws->getUserData()->player_id;
+        const PlayerId& player_id = ws->getUserData()->player_id;
         auto room_it = rooms.find(room_id);
         if (room_it != rooms.end()) {
             std::shared_ptr<Room> room = room_it->second;
@@ -94,19 +103,22 @@ void RoomManager::on_message(WebSocket* ws, std::string_view message) {
                 winner_id
             );
             room->applyCommand(finish_room_command);
+            PLOG(plog::info) << "Room finished: room_id " << room_id
+                << " player_id " << player_id << " winner_id " << winner_id;
         }
     }
 }
 
 void RoomManager::on_close(WebSocket* ws) {
-    std::cout << "On close" << std::endl;
     const std::string& room_id = ws->getUserData()->room_id;
     const PlayerId& player_id = ws->getUserData()->player_id;
+    PLOG(plog::info) << "On close: " << room_id << " " << player_id << std::endl;
     auto room_it = rooms.find(room_id);
     if (room_it != rooms.end()) {
         std::shared_ptr<Room> room = room_it->second;
         auto remove_command = std::make_shared<RemovePlayerCommand>(player_id);
         room->applyCommand(remove_command);
+        PLOG(plog::info) << "Player removed: room_id " << room_id << " player_id " << player_id;
     }
 }
 
@@ -114,7 +126,6 @@ void RoomManager::on_event_loop() {
     for (auto& room_it : rooms) {
         auto room = room_it.second;
         if (room->get_is_game_playing()) {
-//            std::cout << "Playing" << std::endl;
             auto tick_command = std::make_shared<SendToAllCommand>(
                 room->format_player_event_was_sent_response()
             );

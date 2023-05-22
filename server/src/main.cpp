@@ -4,14 +4,18 @@
 
 #include <App.h>
 #include <HttpResponse.h>
+#include "plog/Log.h"
+#include "plog/Initializers/RollingFileInitializer.h"
 
 #include "defs.h"
 #include "room_manager.h"
 
-// TODO
-RoomManager manager;
+// TODO: move to a better place
+RoomManager& manager = RoomManager::get_instance();
 
 int main() {
+	plog::init(plog::info, "server.log");
+
 	uWS::SocketContextOptions options = {};
 
 	uWS::App app = uWS::App(options).ws<PerSocketData>("/room/join", {
@@ -26,10 +30,8 @@ int main() {
 		}
 	}).post("/room/create", [](uWS::HttpResponse<false>* response, uWS::HttpRequest*) {
 		// TODO rewrite in a better shape and track abortion
-		std::cout << "On create" << std::endl;
 //		bool is_aborted = false;
 		response->onData([response, body = (std::string *)nullptr](std::string_view chunk, bool is_last) mutable {
-			std::cout << "On data: " << is_last << chunk << std::endl;
 			// if (is_aborted) {
 			// 	std::cout << "Request was aborted" << std::endl;
 			// 	return;

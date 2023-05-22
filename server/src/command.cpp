@@ -1,4 +1,7 @@
 #include "command.h"
+#include "database.h"
+
+#include "plog/Log.h"
 
 CreatePlayerCommand::CreatePlayerCommand(
     WebSocket* ws_arg,
@@ -22,7 +25,7 @@ SendToOneCommand::SendToOneCommand(const PlayerId& player_id_arg, const std::str
 void SendToOneCommand::apply(RoomState& state) const {
     auto player_it = state.players.find(player_id);
     if (player_it == state.players.end()) {
-        std::cout << "ERROR" << std::endl;
+        PLOG(plog::error) << "ERROR: " << player_id;
         return;
     }
     player_it->second.ws->send(data, uWS::OpCode::TEXT);
@@ -50,7 +53,7 @@ SetPlayerEventCommand::SetPlayerEventCommand(const PlayerId& player_id_arg, Play
 void SetPlayerEventCommand::apply(RoomState& state) const {
     auto player_it = state.players.find(player_id);
     if (player_it == state.players.end()) {
-        std::cout << "ERROR" << std::endl;
+        PLOG(plog::error) << "ERROR: " << player_id;
         return;
     }
     player_it->second.event = event;

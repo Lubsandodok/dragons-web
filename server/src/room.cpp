@@ -39,17 +39,14 @@ std::unordered_set<PlayerStartingPosition> Room::get_current_starting_positions(
 
 std::string Room::format_join_room_response(const PlayerId& player_id) const {
     // TODO result -> parameters
-    std::cout << "format_join_room_response-start" << std::endl;
     json response = {
         {"method", "JOIN_ROOM"},
         {"result", {{"your_player", player_id}}},
     };
-    std::cout << "format_join_room_response-end" << std::endl;
     return response.dump();
 }
 
 std::string Room::format_player_was_joined_response() const {
-    std::cout << "format_player_was_joined_response-start" << std::endl;
     json response = {
         {"method", "PLAYER_WAS_JOINED"},
         {"parameters", {
@@ -65,7 +62,6 @@ std::string Room::format_player_was_joined_response() const {
         };
         response["parameters"]["players"].push_back(player);
     }
-    std::cout << "format_player_was_joined_response-end" << std::endl;
     return response.dump();
 }
 
@@ -80,6 +76,5 @@ std::string Room::format_player_event_was_sent_response() const {
         std::string event = utils::player_event_to_string(id_player.second.event);
         response["parameters"]["players"].push_back({{id_player.first, event}});
     }
-    std::cout << "Loop: " << response.dump() << std::endl;
     return response.dump();
 }

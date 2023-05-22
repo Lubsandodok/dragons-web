@@ -3,6 +3,8 @@
 #include <random>
 #include <sstream>
 
+#include "plog/Log.h"
+
 namespace utils {
     std::string generate_uuid4() {
         std::random_device rd;
@@ -43,7 +45,7 @@ namespace utils {
         if (method_it != str_to_enum.end()) {
             return method_it->second;
         } else {
-            std::cout << "ERROR" << std::endl;
+            PLOG(plog::error) << "ERROR: " << method_key;
             return GameMethod::NONE;
         }
     }
@@ -63,7 +65,7 @@ namespace utils {
         if (event_it != str_to_enum.end()) {
             return event_it->second;
         } else {
-            std::cout << "ERROR" << std::endl;
+            PLOG(plog::error) << "ERROR: " << player_key;
             return PlayerEvent::NONE;
         }
     }
@@ -82,7 +84,7 @@ namespace utils {
         if (event_it != enum_to_str.end()) {
             return event_it->second;
         } else {
-            std::cout << "ERROR" << std::endl;
+            PLOG(plog::error) << "ERROR: " << static_cast<int>(event);
             return enum_to_str[PlayerEvent::NONE];
         }
     }

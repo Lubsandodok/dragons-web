@@ -2,6 +2,9 @@ node_modules/
 .parcel-cache/
 client/dist/
 server/uWebSockets
+server/server
+server/database.db
+server/server.log
 .cache/
 .vscode/
 compile_commands.json

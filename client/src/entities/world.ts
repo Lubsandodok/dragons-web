@@ -11,6 +11,7 @@ import { Ground } from './ground';
 
 export class World implements WorldUpdatable {
     isGamePlaying: boolean = false;
+    isGameFinished: boolean = false;
     myPlayerId: string;
     winnerId?: string;
 
@@ -98,7 +99,7 @@ export class World implements WorldUpdatable {
     }
 
     getPanelState() : PanelState {
-        if (!this.isGamePlaying) {
+        if (!this.isGamePlaying && !this.isGameFinished) {
             return;
         }
 
@@ -157,6 +158,7 @@ export class World implements WorldUpdatable {
         if (alivePlayers.length === 1) {
             // TODO: This should be handled by the server
             this.isGamePlaying = false;
+            this.isGameFinished = true;
             this.winnerId = alivePlayers[0];
             console.log('Game over', alivePlayers[0]);
             this.controls.finishGame(alivePlayers[0]);
