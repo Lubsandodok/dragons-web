@@ -1,5 +1,6 @@
-import { Application } from 'pixi.js';
+import { Application, Sprite, BLEND_MODES } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
+import { Stage, Layer } from '@pixi/layers';
 
 import { World } from '../entities';
 import { Controls } from '../controls';
@@ -22,11 +23,23 @@ export class Canvas {
 
             interaction: this.app.renderer.plugins.interaction,
         });
+        this.app.stage = new Stage();
         this.app.stage.addChild(this.camera);
         this.camera
             .drag()
             .wheel();
+        const lighting = new Layer();
+        lighting.on('display', (element) => {
+            element.blendMode = BLEND_MODES.ADD;
+        });
+        lighting.useRenderTexture = true;
+        lighting.clearColor = [0.5, 0.5, 0.5, 1];
+        this.app.stage.addChild(lighting);
 
-        this.world = new World(this.camera, controls);
+        const lightingSprite = new Sprite(lighting.getRenderTexture());
+        lightingSprite.blendMode = BLEND_MODES.MULTIPLY;
+        this.app.stage.addChild(lightingSprite);
+
+        this.world = new World({camera: this.camera, lighting, controls});
     }
 }

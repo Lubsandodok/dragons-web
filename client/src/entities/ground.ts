@@ -1,8 +1,8 @@
 import { Graphics } from 'pixi.js';
-import { Viewport } from 'pixi-viewport';
 import Rapier from '@dimforge/rapier2d-compat';
 
 import { Physical, WORLD_SIDE_X } from '../canvas';
+import { WorldContext } from './world';
 
 export type GroundOptions = {
     x: number,
@@ -17,7 +17,7 @@ export class Ground implements Physical {
     collider: Rapier.Collider;
 
     constructor(
-        public camera: Viewport,
+        public context: WorldContext,
         public physics: Rapier.World,
         options: GroundOptions,
     ) {
@@ -35,7 +35,7 @@ export class Ground implements Physical {
         visual.beginFill(0x808080);
         visual.drawRect(translation.x - options.width / 2, translation.y - options.height / 2, options.width, options.height);
         visual.endFill();
-        camera.addChild(visual);
+        this.context.camera.addChild(visual);
     }
 
     getHandle(): number {

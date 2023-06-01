@@ -1,6 +1,5 @@
-import { AnimatedSprite, Spritesheet, Container, PI_2 } from 'pixi.js';
-import Rapier, { Vector2 } from '@dimforge/rapier2d-compat';
-import { Viewport } from 'pixi-viewport';
+import { AnimatedSprite, Spritesheet, Container, PI_2, Graphics } from 'pixi.js';
+import Rapier from '@dimforge/rapier2d-compat';
 
 import { Movable } from '../controls';
 import {
@@ -14,10 +13,12 @@ import {
     Physical,
 } from '../canvas';
 import { FireballOptions } from './fireball';
+import { WorldContext } from './world';
 
 export type DragonOptions = {
     resource: Spritesheet,
     position: Rapier.Vector,
+    isPlayer: boolean,
 };
 
 enum DragonDirection {
@@ -34,6 +35,7 @@ enum DragonSprite {
 
 export class Dragon implements Physical, Movable {
     lives: number = LIVES_AT_START;
+    isPlayer: boolean;
     direction: DragonDirection = DragonDirection.RIGHT;
     sprites: {[key in DragonSprite]: AnimatedSprite};
     currentSpriteName: DragonSprite;
@@ -42,7 +44,7 @@ export class Dragon implements Physical, Movable {
     collider: Rapier.Collider;
 
     constructor(
-        public camera: Viewport,
+        public context: WorldContext,
         public physics: Rapier.World,
         options: DragonOptions,
     ) {
@@ -57,7 +59,9 @@ export class Dragon implements Physical, Movable {
         colliderDesc.setActiveEvents(Rapier.ActiveEvents.COLLISION_EVENTS);
         this.collider = physics.createCollider(colliderDesc, this.rigidBody);
 
+        this.isPlayer = options.isPlayer;
         this.initSprites(options);
+        this.initCamera(options);
     }
 
     private initSprites(options: DragonOptions): void {
@@ -82,9 +86,29 @@ export class Dragon implements Physical, Movable {
         visual.pivot.set(DRAGON_SIDE_X / 2, DRAGON_SIDE_Y / 2);
         visual.visible = true;
         this.visual = visual;
-        this.camera.addChild(visual);
+        this.context.camera.addChild(visual);
         this.currentSpriteName = DragonSprite.FLYING;
         this.changeSprite(DragonSprite.FLYING);
+
+        const light = new Graphics();
+        light.beginFill(0xffffff, 0.5);
+        light.drawCircle(DRAGON_SIDE_X / 2, DRAGON_SIDE_Y / 2, 100);
+        light.endFill();
+        light.parentLayer = this.context.lighting;
+        visual.addChild(light);
+    }
+
+    private initCamera(options: DragonOptions): void {
+        if (options.isPlayer) {
+            this.context.camera.follow(
+                this.visual,
+                {
+                    speed: 0,
+                    acceleration: null,
+                    radius: null,
+                },
+            );
+        }
     }
 
     private changeSprite(spriteName: DragonSprite): void {
@@ -252,9 +276,5 @@ export class Dragon implements Physical, Movable {
     destroy() {
         // TODO: destroy all sprites
         this.getCurrentSprite().destroy();
-    }
-
-    get() : Container {
-        return this.visual;
     }
 }

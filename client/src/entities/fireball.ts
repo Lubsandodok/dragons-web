@@ -3,6 +3,7 @@ import Rapier from '@dimforge/rapier2d-compat';
 import { Viewport } from 'pixi-viewport';
 
 import { resources, FIREBALL_SIDE_X, FIREBALL_SIDE_Y, unitVector, rotateRightVector, multiplyVector, computeRotationVector, Physical } from '../canvas';
+import { WorldContext } from './world';
 
 export type FireballOptions = {
     position: Rapier.Vector,
@@ -18,7 +19,7 @@ export class Fireball implements Physical {
     options: FireballOptions; // TODO: remove it
 
     constructor(
-        public camera: Viewport,
+        public context: WorldContext,
         public physics: Rapier.World,
         options: FireballOptions,
     ) {
@@ -28,7 +29,7 @@ export class Fireball implements Physical {
         this.sprite.animationSpeed = 0.3;
         this.sprite.play();
 
-        this.camera.addChild(this.sprite);
+        this.context.camera.addChild(this.sprite);
 
         let rigidBodyDesc = Rapier.RigidBodyDesc.dynamic()
             .setTranslation(options.position.x, options.position.y)

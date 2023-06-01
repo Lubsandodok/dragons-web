@@ -1,8 +1,8 @@
-import { Viewport } from 'pixi-viewport';
 import { Sprite } from 'pixi.js';
 import Rapier from '@dimforge/rapier2d-compat';
 
 import { Physical, WORLD_SIDE_X, WORLD_SIDE_Y, resources } from '../canvas';
+import { WorldContext } from './world';
 import { Dragon, DragonOptions } from './dragon';
 import { Fireball } from './fireball';
 import { Level } from './level';
@@ -16,7 +16,7 @@ export class EntityManager {
     dragons: {[playerId: string]: Dragon} = {};
     fireballs: {[handle: number]: Fireball} = {};
 
-    constructor(public camera: Viewport, public physics: Rapier.World) {
+    constructor(public context: WorldContext, public physics: Rapier.World) {
         // TODO: work on a level
         // this.level = new Level(camera, physics);
         this.createLevel();
@@ -29,14 +29,14 @@ export class EntityManager {
             console.log('Such player already exists', playerId);
             return null;
         }
-        const dragon = new Dragon(this.camera, this.physics, options);
+        const dragon = new Dragon(this.context, this.physics, options);
         this.handles[dragon.getHandle()] = dragon;
         this.dragons[playerId] = dragon;
         return dragon;
     }
 
     private createGround(options: GroundOptions) {
-        const ground = new Ground(this.camera, this.physics, options);
+        const ground = new Ground(this.context, this.physics, options);
         this.handles[ground.getHandle()] = ground;
         this.grounds[ground.getHandle()] = ground;
     }
@@ -47,7 +47,7 @@ export class EntityManager {
         // TODO: use constants from separated file
         backgroundSprite.scale = {x: 1, y: 1};
         this.background = backgroundSprite;
-        this.camera.addChild(this.background);
+        this.context.camera.addChild(this.background);
 
         this.createGround({
             x: 0,
@@ -96,7 +96,7 @@ export class EntityManager {
     createFireball(playerId : string) : Fireball {
         const dragon = this.dragons[playerId];
         const fireball = new Fireball(
-            this.camera, this.physics, dragon.getFireballOptions(),
+            this.context, this.physics, dragon.getFireballOptions(),
         );
         this.handles[fireball.getHandle()] = fireball;
         this.fireballs[fireball.getHandle()] = fireball;

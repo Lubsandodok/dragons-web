@@ -1,5 +1,6 @@
 import { Graphics, Spritesheet } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
+import { Layer } from '@pixi/layers';
 import Rapier from '@dimforge/rapier2d-compat';
 
 import { resources, WORLD_SIDE_X, WORLD_SIDE_Y, PlayerEvent, PanelState, Physical, PlayerStartingPosition } from '../canvas';
@@ -8,6 +9,12 @@ import { EntityManager } from './entitymanager';
 import { Dragon, DragonOptions } from './dragon';
 import { Fireball } from './fireball';
 import { Ground } from './ground';
+
+export type WorldContext = {
+    camera: Viewport,
+    lighting: Layer,
+    controls: Controls,
+};
 
 export class World implements WorldUpdatable {
     isGamePlaying: boolean = false;
@@ -23,16 +30,16 @@ export class World implements WorldUpdatable {
 
     debugGraphics: Graphics;
 
-    constructor(public camera: Viewport, public controls: Controls) {
+    constructor(public context: WorldContext) {
         const gravity = {x: 0.0, y: 20};
         this.physicsWorld = new Rapier.World(gravity);
         this.eventQueue = new Rapier.EventQueue(true);
         this.debugGraphics = new Graphics();        
-        this.entityManager = new EntityManager(camera, this.physicsWorld);
-        camera.addChild(this.debugGraphics);
+        this.entityManager = new EntityManager(context, this.physicsWorld);
+        context.camera.addChild(this.debugGraphics);
 
-        this.camera.moveCenter(WORLD_SIDE_X / 2, WORLD_SIDE_Y / 2);
-        this.camera.clamp({
+        context.camera.moveCenter(WORLD_SIDE_X / 2, WORLD_SIDE_Y / 2);
+        context.camera.clamp({
             left: 0,
             right: WORLD_SIDE_X,
             top: 0,
@@ -49,7 +56,7 @@ export class World implements WorldUpdatable {
     ): void {
         const dragon = this.entityManager.createDragon(
             playerId,
-            this.getDragonOptions(startingPosition),
+            this.getDragonOptions(startingPosition, playerId),
         );
         if (dragon === null) {
             return;
@@ -57,14 +64,6 @@ export class World implements WorldUpdatable {
         dragon.update();
 
         this.nicknames[playerId] = nickname;
-
-        if (this.myPlayerId === playerId) {
-            this.camera.follow(dragon.get(), {
-                speed: 0,
-                acceleration: null,
-                radius: null,
-            })
-        }
     }
 
     moveCharacter(playerId: string, event: string): void {
@@ -161,7 +160,7 @@ export class World implements WorldUpdatable {
             this.isGameFinished = true;
             this.winnerId = alivePlayers[0];
             console.log('Game over', alivePlayers[0]);
-            this.controls.finishGame(alivePlayers[0]);
+            this.context.controls.finishGame(alivePlayers[0]);
         }
     }
 
@@ -181,11 +180,13 @@ export class World implements WorldUpdatable {
         }
     }
 
-    private getDragonOptions(startingPosition: PlayerStartingPosition) : DragonOptions {
+    private getDragonOptions(startingPosition: PlayerStartingPosition, playerId: string) : DragonOptions {
+        const isPlayer = this.myPlayerId === playerId;
         function generateOptions(resource: Spritesheet, x_shift: number, y_shift: number) : DragonOptions {
             return {
                 resource: resource,
                 position: new Rapier.Vector2(WORLD_SIDE_X / 2 + x_shift, WORLD_SIDE_Y / 2 + y_shift),
+                isPlayer: isPlayer,
             };
         }
 

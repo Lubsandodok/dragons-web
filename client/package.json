@@ -19,6 +19,7 @@
     "@dimforge/rapier2d-compat": "^0.11.2",
     "@parcel/transformer-raw": "^2.8.0",
     "@picocss/pico": "^1.5.6",
+    "@pixi/layers": "~1.0.5",
     "csstype": "^3.1.1",
     "pixi-viewport": "^4.38.0",
     "pixi.js": "~6.5.8",
