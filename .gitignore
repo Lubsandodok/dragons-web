@@ -8,3 +8,5 @@ server/server.log
 .cache/
 .vscode/
 compile_commands.json
+.idea
+
