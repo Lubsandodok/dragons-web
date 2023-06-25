@@ -55,7 +55,7 @@ export class Dragon implements Physical, Movable {
             .setLinearDamping(0.4);
         this.rigidBody = physics.createRigidBody(rigidBodyDesc);
 
-        let colliderDesc = Rapier.ColliderDesc.capsule(20, 20).setDensity(1);
+        let colliderDesc = Rapier.ColliderDesc.ball(20).setDensity(0.01);
         colliderDesc.setActiveEvents(Rapier.ActiveEvents.COLLISION_EVENTS);
         this.collider = physics.createCollider(colliderDesc, this.rigidBody);
 
@@ -140,7 +140,7 @@ export class Dragon implements Physical, Movable {
         const rotationVector = computeRotationVector(this.rigidBody.rotation());
         const rotationVectorDirected = rotateRightVector(rotationVector);
         // console.log('Rotation vector', rotationVector);
-        this.rigidBody.applyImpulse(multiplyVector(rotationVectorDirected, 120 * 1000), false);
+        this.rigidBody.applyImpulse(multiplyVector(rotationVectorDirected, 120 * 10), false);
         this.getCurrentSprite().gotoAndPlay(0);
     }
 
@@ -152,7 +152,7 @@ export class Dragon implements Physical, Movable {
 
         const rotation = this.rigidBody.rotation();
         // const directionNumber = -1 * this.getDirectionNumber();
-        this.rigidBody.applyTorqueImpulse(20 * 20 * 2000 * -1, false);
+        this.rigidBody.applyTorqueImpulse(20 * 20 * 20 * -1, false);
         // this.rigidBody.setRotation(rotation - 3.14 / 4, false);
         this.getCurrentSprite().gotoAndPlay(0);
     }
@@ -165,7 +165,7 @@ export class Dragon implements Physical, Movable {
 
         const rotation = this.rigidBody.rotation();
         // const directionNumber = 1 * this.getDirectionNumber();
-        this.rigidBody.applyTorqueImpulse(20 * 20 * 2000, false);
+        this.rigidBody.applyTorqueImpulse(20 * 20 * 20, false);
         // this.rigidBody.setRotation(rotation + 3.14 / 4, false);
         this.getCurrentSprite().gotoAndPlay(0);
     }

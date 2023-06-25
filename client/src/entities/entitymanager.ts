@@ -24,7 +24,7 @@ export class EntityManager {
         // this.handles[this.level.getHandle()] = this.level;
     }
 
-    createDragon(playerId : string, options : DragonOptions) : Dragon {
+    createDragon(playerId : string, options : DragonOptions) : Dragon | null {
         if (this.dragons.hasOwnProperty(playerId)) {
             console.log('Such player already exists', playerId);
             return null;
