@@ -1,32 +1,29 @@
-import React from 'react';
+import React from "react";
 
-import { Rooms, RoomsProps } from './Rooms';
-import Panel from './Panel';
-import { PanelState } from '../canvas';
+import Panel from "./Panel";
+import { PanelState } from "../canvas";
+
+import {type Props as LauchWindowProps, LauchWindow } from "./LauchWindow";
 
 type UiProps = {
-    isRoomsVisible: boolean,
-    roomProps: RoomsProps,
-    panelState: PanelState,
+  isRoomsVisible: boolean;
+  roomProps: LauchWindowProps;
+  panelState: PanelState;
 };
 
 class Ui extends React.Component<UiProps> {
-    constructor(props: UiProps) {
-        super(props);   
-    }
+  constructor(props: UiProps) {
+    super(props);
+  }
 
-    render() {
-        return (
-            <div>
-                {this.props.isRoomsVisible &&
-                    <Rooms {...this.props.roomProps}/>
-                }
-                {!this.props.isRoomsVisible &&
-                    <Panel {...this.props.panelState}/>
-                }
-            </div>
-        );
-    }
+  render() {
+    return (
+      <div>
+        {this.props.isRoomsVisible && <LauchWindow {...this.props.roomProps} />}
+        {!this.props.isRoomsVisible && <Panel {...this.props.panelState} />}
+      </div>
+    );
+  }
 }
 
 export default Ui;
