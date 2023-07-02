@@ -31,7 +31,7 @@ export class World implements WorldUpdatable {
     debugGraphics: Graphics;
 
     constructor(public context: WorldContext) {
-        const gravity = {x: 0.0, y: 20};
+        const gravity = {x: 0.0, y: 9.81};
         this.physicsWorld = new Rapier.World(gravity);
         this.eventQueue = new Rapier.EventQueue(true);
         this.debugGraphics = new Graphics();        
@@ -122,11 +122,12 @@ export class World implements WorldUpdatable {
         } else if (first instanceof Dragon && second instanceof Fireball) {
             this.entityManager.dragonIsHit(first);
             this.entityManager.removeFireball(handleSecond);
-        } else if (first instanceof Dragon && second instanceof Ground) {
-            this.entityManager.dragonIsHit(first, true);
-        } else if (first instanceof Ground && second instanceof Dragon) {
-            this.entityManager.dragonIsHit(second, true);
         }
+        // } else if (first instanceof Dragon && second instanceof Ground) {
+        //     this.entityManager.dragonIsHit(first, true);
+        // } else if (first instanceof Ground && second instanceof Dragon) {
+        //     this.entityManager.dragonIsHit(second, true);
+        // }
     }
 
     update() {
@@ -156,7 +157,11 @@ export class World implements WorldUpdatable {
         const alivePlayers = this.entityManager.getAlivePlayerIds();
         if (alivePlayers.length === 1) {
             // TODO: This should be handled by the server
-            this.isGamePlaying = false;
+            // this.isGamePlaying = false;
+            // TODO: Event system would work pretty good here
+            setTimeout(() => {
+                this.isGamePlaying = false;
+            }, 10000);
             this.isGameFinished = true;
             this.winnerId = alivePlayers[0];
             console.log('Game over', alivePlayers[0]);
