@@ -1,11 +1,18 @@
 import { ISpritesheetData, ISpritesheetFrameData, Spritesheet, BaseTexture, Texture, Rectangle } from 'pixi.js';
 
+// @ts-expect-error<parcel import>
 import dragonGreenImage from 'url:../assets/dragon_green.png';
+// @ts-expect-error<parcel import>
 import dragonBlueImage from 'url:../assets/dragon_blue.png';
+// @ts-expect-error<parcel import>
 import dragonRedImage from 'url:../assets/dragon_red.png';
+// @ts-expect-error<parcel import>
 import dragonBlackImage from 'url:../assets/dragon_night.png';
+// @ts-expect-error<parcel import>
 import skyImage from 'url:../assets/sky.png';
+// @ts-expect-error<parcel import>
 import fireballsImage from 'url:../assets/origin.png';
+// @ts-expect-error<parcel import>
 import groundImage from 'url:../assets/ground_tileset.png';
 
 import { DRAGON_SIDE_X, DRAGON_SIDE_Y, FIREBALL_SIDE_X, FIREBALL_SIDE_Y } from './constants';

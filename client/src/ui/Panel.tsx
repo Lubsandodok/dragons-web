@@ -1,6 +1,7 @@
 import React from 'react';
 import CSS from 'csstype';
 
+// @ts-expect-error<parcel import>
 import heartImage from 'url:../assets/heart.png';
 
 const DivCss: CSS.Properties = {

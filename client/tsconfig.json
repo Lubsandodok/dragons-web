@@ -12,6 +12,7 @@
         ],
         "esModuleInterop": true,
         "moduleResolution": "node",
-        "strictNullChecks": false
+        "strictNullChecks": false,
+        "noEmit": true
     }
 }
