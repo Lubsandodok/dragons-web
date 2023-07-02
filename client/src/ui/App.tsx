@@ -7,6 +7,7 @@ import {
   PanelState,
 } from "../canvas";
 import { Controls } from "../controls";
+import {LauchWindowMode} from './constants';
 import type { Props as LauchWindowProps } from "./LauchWindow";
 import Ui from "./Ui";
 
@@ -31,10 +32,7 @@ class App extends React.Component {
         createRoom: this.createRoom,
         joinRoom: this.joinRoom,
         roomId: null,
-        isCreateRoomVisible: true,
-        isPlayerCountVisible: true,
-        isJoinRoomVisible: false,
-        isNicknameVisible: false,
+        mode: LauchWindowMode.CREATING_ROOM,
       },
       panelState: { playerLives: LIVES_AT_START, winnerName: null },
     };
@@ -66,10 +64,7 @@ class App extends React.Component {
         roomProps: {
           ...this.state.roomProps,
           roomId: roomId,
-          isCreateRoomVisible: false,
-          isPlayerCountVisible: false,
-          isJoinRoomVisible: true,
-          isNicknameVisible: true,
+          mode: LauchWindowMode.JOINING_ROOM,
         },
       });
       // this.controls.joinRoom(roomId);
@@ -98,10 +93,7 @@ class App extends React.Component {
           roomProps: {
             ...this.state.roomProps,
             roomId: data.room_id,
-            isCreateRoomVisible: false,
-            isPlayerCountVisible: false,
-            isJoinRoomVisible: true,
-            isNicknameVisible: true,
+            mode: LauchWindowMode.JOINING_ROOM,
           },
         });
       })

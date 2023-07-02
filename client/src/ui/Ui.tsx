@@ -19,8 +19,7 @@ class Ui extends React.Component<UiProps> {
   render() {
     return (
       <div>
-        {this.props.isRoomsVisible && <LauchWindow {...this.props.roomProps} />}
-        {!this.props.isRoomsVisible && <Panel {...this.props.panelState} />}
+        {this.props.isRoomsVisible ? <LauchWindow {...this.props.roomProps} /> : <Panel {...this.props.panelState} />}
       </div>
     );
   }
