@@ -7,7 +7,7 @@ import {
   PanelState,
 } from "../canvas";
 import { Controls } from "../controls";
-import {LauchWindowMode} from './constants';
+import { LauchWindowMode } from "./constants";
 import type { Props as LauchWindowProps } from "./LauchWindow";
 import Ui from "./Ui";
 

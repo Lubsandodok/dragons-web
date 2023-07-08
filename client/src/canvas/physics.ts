@@ -1,9 +1,9 @@
-import Rapier from '@dimforge/rapier2d-compat';
+import Rapier from "@dimforge/rapier2d-compat";
 
 export interface Physical {
-    getHandle(): number;
+  getHandle(): number;
 }
 
 export async function loadPhysicsEngine() {
-    await Rapier.init();
+  await Rapier.init();
 }

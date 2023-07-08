@@ -3,7 +3,7 @@ import React from "react";
 import Panel from "./Panel";
 import { PanelState } from "../canvas";
 
-import {type Props as LauchWindowProps, LauchWindow } from "./LauchWindow";
+import { type Props as LauchWindowProps, LauchWindow } from "./LauchWindow";
 
 type UiProps = {
   isRoomsVisible: boolean;
@@ -19,7 +19,11 @@ class Ui extends React.Component<UiProps> {
   render() {
     return (
       <div>
-        {this.props.isRoomsVisible ? <LauchWindow {...this.props.roomProps} /> : <Panel {...this.props.panelState} />}
+        {this.props.isRoomsVisible ? (
+          <LauchWindow {...this.props.roomProps} />
+        ) : (
+          <Panel {...this.props.panelState} />
+        )}
       </div>
     );
   }
