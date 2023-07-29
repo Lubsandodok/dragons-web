@@ -17,6 +17,7 @@ import {
   rotateRightVector,
   computeRotationVector,
   Physical,
+  PlayerEvent,
 } from "../canvas";
 import { FireballOptions } from "./fireball";
 import { WorldContext } from "./world";
@@ -43,6 +44,9 @@ export class Dragon implements Physical, Movable {
   lives: number = LIVES_AT_START;
   isPlayer: boolean;
   direction: DragonDirection = DragonDirection.RIGHT;
+  nextAction: PlayerEvent = PlayerEvent.NONE;
+  postActionHandler: Function | null = null;
+
   sprites: { [key in DragonSprite]: AnimatedSprite };
   currentSpriteName: DragonSprite;
   visual: Container;
@@ -98,7 +102,7 @@ export class Dragon implements Physical, Movable {
 
     const light = new Graphics();
     light.beginFill(0xffffff, 0.5);
-    light.drawCircle(DRAGON_SIDE_X / 2, DRAGON_SIDE_Y / 2, 100);
+    light.drawCircle(DRAGON_SIDE_X / 2, DRAGON_SIDE_Y / 2, 300);
     light.endFill();
     light.parentLayer = this.context.lighting;
     visual.addChild(light);
@@ -127,60 +131,67 @@ export class Dragon implements Physical, Movable {
     return this.sprites[this.currentSpriteName];
   }
 
-  private canMove(): boolean {
-    if (this.lives === 0 || this.getCurrentSprite().playing) {
-      return false;
-    }
-    return true;
-  }
-
-  moveUp(): void {
-    // console.log('Move up');
-    if (!this.canMove()) {
+  private runAction(): void {
+    if (this.getCurrentSprite().playing) {
       return;
     }
+    if (this.nextAction === PlayerEvent.DRAGON_MOVE) {
+      this.moveUp();
+    } else if (this.nextAction === PlayerEvent.DRAGON_LEFT) {
+      this.moveLeft();
+    } else if (this.nextAction === PlayerEvent.DRAGON_RIGHT) {
+      this.moveRight();
+    } else if (this.nextAction === PlayerEvent.DRAGON_TURN_BACK) {
+      this.turnBack();
+    } else if (this.nextAction === PlayerEvent.CREATE_FIREBALL) {
+      this.fire(this.postActionHandler);
+    }
+    if (this.isPlayer) {
+      // console.log("Run action", this.nextAction);
+    }
+    this.nextAction = PlayerEvent.NONE;
+    this.postActionHandler = null;
+  }
 
+  setAction(action: PlayerEvent, postActionHandler: Function | null): void {
+    if (this.isPlayer) {
+      // console.log("Set action", action);
+    }
+    // It is an important if. It should be reworked in future
+    if (action !== PlayerEvent.NONE) {
+      this.nextAction = action;
+      this.postActionHandler = postActionHandler;
+    }
+  }
+
+  private moveUp(): void {
     const rotationVector = computeRotationVector(this.rigidBody.rotation());
     const rotationVectorDirected = rotateRightVector(rotationVector);
     // console.log('Rotation vector', rotationVector);
     this.rigidBody.applyImpulse(
-      multiplyVector(rotationVectorDirected, 120 * 10),
+      multiplyVector(rotationVectorDirected, 120 * 5),
       false
     );
     this.getCurrentSprite().gotoAndPlay(0);
   }
 
-  moveLeft(): void {
-    // console.log('Move left');
-    if (!this.canMove()) {
-      return;
-    }
-
+  private moveLeft(): void {
     const rotation = this.rigidBody.rotation();
     // const directionNumber = -1 * this.getDirectionNumber();
-    this.rigidBody.applyTorqueImpulse(20 * 20 * 20 * -1, false);
+    this.rigidBody.applyTorqueImpulse(20 * 20 * 10 * -1, false);
     // this.rigidBody.setRotation(rotation - 3.14 / 4, false);
     this.getCurrentSprite().gotoAndPlay(0);
   }
 
-  moveRight(): void {
-    // console.log('Move right');
-    if (!this.canMove()) {
-      return;
-    }
-
+  private moveRight(): void {
     const rotation = this.rigidBody.rotation();
     // const directionNumber = 1 * this.getDirectionNumber();
-    this.rigidBody.applyTorqueImpulse(20 * 20 * 20, false);
+    this.rigidBody.applyTorqueImpulse(20 * 20 * 10, false);
     // this.rigidBody.setRotation(rotation + 3.14 / 4, false);
     this.getCurrentSprite().gotoAndPlay(0);
   }
 
-  turnBack(): void {
-    if (!this.canMove()) {
-      return;
-    }
-
+  private turnBack(): void {
     this.visual.scale.x *= -1;
     const newDirection =
       this.direction === DragonDirection.LEFT
@@ -191,11 +202,7 @@ export class Dragon implements Physical, Movable {
   }
 
   // #TODO: do it well. Do not use callbacks
-  fire(fireFinishedFunction: Function): void {
-    if (!this.canMove()) {
-      return;
-    }
-
+  private fire(fireFinishedFunction: Function): void {
     // console.log('Fire');
     this.changeSprite(DragonSprite.FIRING);
     this.getCurrentSprite().onComplete = () => {
@@ -271,6 +278,8 @@ export class Dragon implements Physical, Movable {
     //        console.log('Position', position, 'Rotation', rotation, 'Sprite', this.flyingSprite.rotation);
     this.visual.position = { x: position.x, y: position.y };
     this.visual.rotation = rotation;
+
+    this.runAction();
   }
 
   start() {

@@ -1,4 +1,5 @@
 import { PlayerEvent, GameMethod, PlayerStartingPosition } from "../canvas";
+// import KD from 'keydrown';
 
 export interface Movable {
   moveUp(): void;
@@ -12,13 +13,13 @@ export interface WorldUpdatable {
     startingPosition: PlayerStartingPosition,
     nickname: string
   ): void;
-  createFireball(playerId: string): void;
-  moveCharacter(playerId: string, event: string): void;
+  applyEvent(playerId: string, event: PlayerEvent): void;
   setIsGamePlaying(isGamePlaying: boolean): void;
   setMyPlayerId(myPlayerId: string): void;
 }
 
 function getPlayerEvent(event: KeyboardEvent) {
+  console.log("Code", event.code);
   if (event.code === "KeyW") {
     return PlayerEvent.DRAGON_MOVE;
   } else if (event.code === "KeyA") {
@@ -45,6 +46,31 @@ export class Controls {
     window.addEventListener("keydown", (event: KeyboardEvent) =>
       this.onKeyDown(event)
     );
+
+    // KD.W.down((event: KeyboardEvent) => {
+    //   console.log('W pressed');
+    //   this.onKeyDown(event);
+    // });
+
+    // KD.A.down((event: KeyboardEvent) => {
+    //   console.log('A pressed');
+    //   this.onKeyDown(event);
+    // });
+
+    // KD.D.down((event: KeyboardEvent) => {
+    //   console.log('D pressed');
+    //   this.onKeyDown(event);
+    // });
+
+    // KD.SPACE.down((event: KeyboardEvent) => {
+    //   console.log('SPACE pressed');
+    //   this.onKeyDown(event);
+    // });
+
+    // KD.SHIFT.down((event: KeyboardEvent) => {
+    //   console.log('SHIFT pressed');
+    //   this.onKeyDown(event);
+    // });
   }
 
   onKeyDown(event: KeyboardEvent) {
@@ -115,12 +141,7 @@ export class Controls {
       for (const player of players) {
         const playerId = Object.keys(player)[0];
         const event = player[playerId];
-        if (event === PlayerEvent.CREATE_FIREBALL) {
-          this.world.createFireball(playerId);
-        } else {
-          this.world.moveCharacter(playerId, event);
-        }
-        //                console.log('Got event', data);
+        this.world.applyEvent(playerId, event);
       }
     }
   }

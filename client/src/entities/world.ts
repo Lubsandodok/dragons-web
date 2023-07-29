@@ -74,27 +74,18 @@ export class World implements WorldUpdatable {
     this.nicknames[playerId] = nickname;
   }
 
-  moveCharacter(playerId: string, event: string): void {
+  applyEvent(playerId: string, event: PlayerEvent): void {
     const dragon = this.entityManager.getDragon(playerId);
-    if (event === PlayerEvent.DRAGON_MOVE) {
-      dragon.moveUp();
-    } else if (event === PlayerEvent.DRAGON_LEFT) {
-      dragon.moveLeft();
-    } else if (event === PlayerEvent.DRAGON_RIGHT) {
-      dragon.moveRight();
-    } else if (event === PlayerEvent.DRAGON_TURN_BACK) {
-      dragon.turnBack();
+    if (event === PlayerEvent.CREATE_FIREBALL) {
+      const fireFinishedFunction = () => {
+        const fireball = this.entityManager.createFireball(playerId);
+        fireball.update();
+        fireball.fire();
+      };
+      dragon.setAction(event, fireFinishedFunction);
+    } else {
+      dragon.setAction(event, null);
     }
-  }
-
-  createFireball(playerId: string) {
-    // console.log('Create fireball for', playerId);
-    const fireFinishedFunction = () => {
-      const fireball = this.entityManager.createFireball(playerId);
-      fireball.update();
-      fireball.fire();
-    };
-    this.entityManager.getDragon(playerId).fire(fireFinishedFunction);
   }
 
   setIsGamePlaying(isGamePlaying: boolean) {
@@ -112,7 +103,7 @@ export class World implements WorldUpdatable {
 
     const playerDragon = this.entityManager.getDragon(this.myPlayerId);
     const winnerName = this.winnerId ? this.nicknames[this.winnerId] : null;
-    console.log("Winner name: ", winnerName);
+    // console.log("Winner name: ", winnerName);
     return { playerLives: playerDragon.getLives(), winnerName: winnerName };
   }
 

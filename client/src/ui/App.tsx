@@ -1,4 +1,5 @@
 import React from "react";
+// import KD from 'keydrown';
 import {
   Canvas,
   loadResources,
@@ -44,6 +45,12 @@ class App extends React.Component {
     this.controls = new Controls();
     this.canvas = new Canvas(this.canvasRef.current, this.controls);
     this.controls.subscibeWorld(this.canvas.world);
+
+    // TODO: KD typescript types
+    // setInterval(() => {
+    //   KD.tick();
+    //   // console.log('GHERE2');
+    // }, 150);
 
     this.canvas.app.ticker.speed = 1;
     this.canvas.app.ticker.add(() => {
